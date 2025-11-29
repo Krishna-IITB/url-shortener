@@ -43,6 +43,29 @@ class UrlModel {
     return result.rows[0] || null;
   }
 
+  async findById(id) {
+    const query = `
+      SELECT id, original_url, short_code, clicks, created_at, expires_at
+      FROM urls
+      WHERE id = $1
+    `;
+    
+    const result = await pool.query(query, [id]);
+    return result.rows[0] || null;
+  }
+
+  async updateShortCode(id, shortCode) {
+    const query = `
+      UPDATE urls
+      SET short_code = $1
+      WHERE id = $2
+      RETURNING id, original_url, short_code, clicks, created_at, expires_at
+    `;
+    
+    const result = await pool.query(query, [shortCode, id]);
+    return result.rows[0] || null;
+  }
+
   async incrementClicks(shortCode) {
     const query = `
       UPDATE urls
