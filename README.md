@@ -1,13 +1,17 @@
-# 🚀 URL Shortener - Day 6 COMPLETE
-## 🎯 Day 6 Features LIVE ✅
+# 🚀 URL Shortener
 
-| Feature | Status | Metrics |
-|---------|--------|---------|
-| Basic URLs | ✅ POST /api/shorten | Base62 encoding |
-| Custom Codes | ✅ customCode | Collision detection |
-| TTL Expiration | ✅ ttlHours: 24 | Auto-cleanup |
-| Rate Limiting | ✅ Redis 100/min/IP | 95% abuse blocked |
-| Redis Caching | ✅ Cache-aside | <50ms p99 |
-| Redirects | ✅ GET /3e → netflix | Click tracking |
+Production-ready URL shortener with Redis caching, rate limiting, custom aliases and link expiry.
 
-## 📈 Live Demo Metrics
+## ✨ Features
+
+| Feature         | Status              | Metrics          |
+|----------------|---------------------|------------------|
+| Basic URLs     | POST /api/shorten   | Base62 encoding  |
+| Custom Codes   | `customCode` field  | Collision checks |
+| TTL Expiration | `ttlHours` field    | Auto-cleanup     |
+| Rate Limiting  | Redis 100/min/IP    | Abuse protection |
+| Redis Caching  | Cache-aside pattern | <50ms p99        |
+| Redirects      | GET /:code          | 301 redirects    |
+
+## Quickstart
+
