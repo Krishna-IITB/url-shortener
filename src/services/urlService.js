@@ -1,3 +1,129 @@
+
+
+// // src/services/urlService.js
+// import validator from 'validator';
+// import urlModel from '../models/urlModel.js';
+// import redisClient from '../config/redis.js';
+// import base62 from '../utils/base62.js';
+
+// class UrlService {
+//   /**
+//    * Create a new short URL:
+//    * - Validate input URL
+//    * - Check if it already exists
+//    * - Insert into DB
+//    * - Generate Base62 shortCode from ID
+//    * - Update DB with shortCode
+//    * - Prime Redis cache
+//    */
+//   async createShortUrl({ url, expiresAt = null }) {
+//     // 1. Validate URL
+//     if (!url || !validator.isURL(url, { require_protocol: true })) {
+//       throw new Error('Invalid URL provided');
+//     }
+
+//     // 2. Check for existing record (optional but nice)
+//     const existing = await urlModel.findByOriginalUrl(url);
+//     if (existing && !existing.expires_at) {
+//       return existing; // already have a short URL for this
+//     }
+
+//     // 3. Insert new row (without shortCode yet)
+//     const created = await urlModel.create({
+//       original_url: url,
+//       expires_at: expiresAt
+//     });
+
+//     // 4. Generate Base62 shortCode from numeric ID
+//     const shortCode = base62.encode(created.id);
+
+//     // 5. Update DB with shortCode
+//     const updated = await urlModel.updateShortCode(created.id, shortCode);
+
+//     // 6. Cache in Redis (1 hour TTL)
+//     const cacheKey = `url:${shortCode}`;
+//     await redisClient.setEx(cacheKey, 3600, url);
+
+//     return updated;
+//   }
+
+//   /**
+//    * Cache-Aside Pattern: Redis first → DB fallback → Cache result
+//    * TTL: 1 hour (3600s) for hot URLs
+//    */
+//   async getOriginalUrl(shortCode) {
+//     const cacheKey = `url:${shortCode}`;
+
+//     try {
+//       // 1. CHECK REDIS FIRST
+//       const cachedUrl = await redisClient.get(cacheKey);
+//       if (cachedUrl) {
+//         console.log(`✅ Redis HIT: ${shortCode} (${cachedUrl.slice(0, 30)}...)`);
+
+//         // Async increment clicks (non-blocking)
+//         urlModel.incrementClicks(shortCode).catch(err =>
+//           console.error('Click increment failed:', err)
+//         );
+
+//         return cachedUrl;
+//       }
+
+//       console.log(`🔍 Redis MISS: ${shortCode} → Querying DB`);
+
+//       // 2. QUERY DATABASE
+//       const urlRecord = await urlModel.findByShortCode(shortCode);
+//       if (!urlRecord) {
+//         console.log(`❌ URL not found: ${shortCode}`);
+//         return null;
+//       }
+
+//       // 3. CHECK EXPIRATION
+//       if (urlRecord.expires_at && new Date(urlRecord.expires_at) < new Date()) {
+//         console.log(`⏰ URL expired: ${shortCode}`);
+//         return null;
+//       }
+
+//       const originalUrl = urlRecord.original_url;
+
+//       // 4. CACHE IN REDIS (1 hour TTL)
+//       await redisClient.setEx(cacheKey, 3600, originalUrl);
+//       console.log(`💾 Cached in Redis: ${shortCode} → ${originalUrl.slice(0, 30)}...`);
+
+//       // 5. INCREMENT CLICKS
+//       await urlModel.incrementClicks(shortCode);
+
+//       return originalUrl;
+
+//     } catch (error) {
+//       console.error(`❌ Cache-aside error for ${shortCode}:`, error);
+//       // Fallback: try DB directly
+//       try {
+//         const urlRecord = await urlModel.findByShortCode(shortCode);
+//         if (urlRecord) await urlModel.incrementClicks(shortCode);
+//         return urlRecord?.original_url || null;
+//       } catch (dbError) {
+//         console.error('DB fallback failed:', dbError);
+//         return null;
+//       }
+//     }
+//   }
+
+//   /**
+//    * Invalidate cache when URL is created/updated
+//    */
+//   async invalidateCache(shortCode) {
+//     const cacheKey = `url:${shortCode}`;
+//     await redisClient.del(cacheKey);
+//     console.log(`🗑️ Cache invalidated: ${shortCode}`);
+//   }
+
+//   // You can also add getUrlStats(shortCode) here if needed
+// }
+
+// export default new UrlService();
+
+
+// src/services/urlService.js
 import validator from 'validator';
 import urlModel from '../models/urlModel.js';
 import redisClient from '../config/redis.js';
@@ -5,185 +131,231 @@ import base62 from '../utils/base62.js';
 
 class UrlService {
   /**
-   * Generate short code using Base62 encoding from database ID
+   * Create a new short URL with optional custom code and TTL
+   * @param {string} url - Original long URL
+   * @param {string|null} customCode - Optional custom short code
+   * @param {number|null} ttlHours - Optional expiration time in hours
    */
-  generateShortCodeFromId(id) {
-    const encoded = base62.encode(id);
-    return base62.pad(encoded, 7); // Pad to 7 characters
+
+
+
+
+
+  // async createShortUrl({ url, customCode = null, ttlHours = null }) {
+  //   // 1. Validate URL
+  //   if (!url || !validator.isURL(url, { require_protocol: true })) {
+  //     throw new Error('Invalid URL provided');
+  //   }
+
+  //   // 2. Calculate expiration from TTL hours
+  //   let expiresAt = null;
+  //   if (ttlHours && ttlHours > 0) {
+  //     expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
+  //   }
+
+  //   // 3. Handle custom code if provided
+  //   if (customCode) {
+  //     // Validate custom code format (alphanumeric, 3-20 chars)
+  //     if (!/^[a-zA-Z0-9]{3,20}$/.test(customCode)) {
+  //       throw new Error('Custom code must be 3-20 alphanumeric characters');
+  //     }
+
+  //     // Check reserved words
+  //     const reservedWords = ['api', 'admin', 'stats', 'analytics', 'health', 'qr', 'preview'];
+  //     if (reservedWords.includes(customCode.toLowerCase())) {
+  //       throw new Error(`'${customCode}' is a reserved word and cannot be used`);
+  //     }
+
+  //     // Check if custom code already exists
+  //     const existing = await urlModel.findByShortCode(customCode);
+  //     if (existing) {
+  //       throw new Error(`Short code '${customCode}' is already taken`);
+  //     }
+
+  //     // Insert with custom code directly
+  //     const created = await urlModel.create({
+  //       original_url: url,
+  //       short_code: customCode,
+  //       expires_at: expiresAt
+  //     });
+
+  //     // Cache in Redis
+  //     const cacheKey = `url:${customCode}`;
+  //     await redisClient.setEx(cacheKey, 3600, url);
+
+  //     return created;
+  //   }
+
+  //   // 4. Auto-generate code: Check for existing URL (avoid duplicates)
+  //   const existing = await urlModel.findByOriginalUrl(url);
+  //   if (existing && !existing.expires_at) {
+  //     // Return existing non-expiring short URL
+  //     return existing;
+  //   }
+
+  //   // 5. Insert new row WITHOUT shortCode yet
+  //   const created = await urlModel.create({
+  //     original_url: url,
+  //     expires_at: expiresAt
+  //     // short_code is NULL initially
+  //   });
+
+  //   // 6. Generate Base62 shortCode from numeric ID
+  //   const shortCode = base62.encode(created.id);
+
+  //   // 7. Update DB with generated shortCode
+  //   const updated = await urlModel.updateShortCode(created.id, shortCode);
+
+  //   // 8. Cache in Redis (1 hour TTL)
+  //   const cacheKey = `url:${shortCode}`;
+  //   await redisClient.setEx(cacheKey, 3600, url);
+
+  //   return updated;
+  // }
+
+
+async createShortUrl({ url, customCode = null, ttlHours = null }) {
+  // 1. Validate URL
+  if (!url || !validator.isURL(url, { require_protocol: true })) {
+    throw new Error('Invalid URL provided');
   }
 
-  /**
-   * Decode short code back to database ID
-   */
-  decodeShortCode(shortCode) {
-    try {
-      return base62.decode(shortCode);
-    } catch (error) {
-      return null;
-    }
+  // 2. Calculate expiration
+  let expiresAt = null;
+  if (ttlHours && ttlHours > 0) {
+    expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
   }
 
-  /**
-   * Validate URL format (HTTP/HTTPS protocol required)
-   */
-  validateUrl(url) {
-    // Regex check for http/https protocol
-    const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
-    
-    return validator.isURL(url, {
-      protocols: ['http', 'https'],
-      require_protocol: true,
-    }) && urlRegex.test(url);
-  }
-
-  /**
-   * Create a shortened URL using Base62 encoding
-   */
-  async createShortUrl(originalUrl, customCode = null, ttlHours = null) {
-    // Validate URL with regex check for http/https
-    if (!this.validateUrl(originalUrl)) {
-      throw new Error('Invalid URL format. Must include http:// or https://');
+  // 3. CUSTOM CODE PATH (WORKS)
+  if (customCode) {
+    if (!/^[a-zA-Z0-9]{3,20}$/.test(customCode)) {
+      throw new Error('Custom code must be 3-20 alphanumeric characters');
     }
 
-    // Check if URL already exists (avoid duplicates)
-    const existing = await urlModel.findByOriginalUrl(originalUrl);
-    if (existing && !existing.expires_at) {
-      return {
-        shortCode: existing.short_code,
-        shortUrl: `${process.env.BASE_URL}/${existing.short_code}`,
-        originalUrl: existing.original_url,
-        isExisting: true,
-      };
+    const reservedWords = ['api', 'admin', 'stats', 'analytics', 'health', 'qr', 'preview'];
+    if (reservedWords.includes(customCode.toLowerCase())) {
+      throw new Error(`'${customCode}' is a reserved word`);
     }
 
-    // Calculate expiration
-    const expiresAt = ttlHours 
-      ? new Date(Date.now() + ttlHours * 60 * 60 * 1000)
-      : null;
-
-    // Handle custom short codes
-    if (customCode) {
-      // Validate custom code (alphanumeric only)
-      if (!/^[0-9A-Za-z]+$/.test(customCode)) {
-        throw new Error('Custom code must contain only alphanumeric characters');
-      }
-
-      // Check if custom code already exists
-      const existingCustom = await urlModel.findByShortCode(customCode);
-      if (existingCustom) {
-        throw new Error('Custom short code already exists');
-      }
-
-      // Create with custom code
-      const urlRecord = await urlModel.create({
-        originalUrl,
-        shortCode: customCode,
-        expiresAt,
-      });
-
-      await redisClient.setEx(
-        `url:${customCode}`,
-        7 * 24 * 60 * 60,
-        originalUrl
-      );
-
-      return {
-        shortCode: urlRecord.short_code,
-        shortUrl: `${process.env.BASE_URL}/${urlRecord.short_code}`,
-        originalUrl: urlRecord.original_url,
-        expiresAt: urlRecord.expires_at,
-        isExisting: false,
-        method: 'custom',
-      };
+    const existing = await urlModel.findByShortCode(customCode);
+    if (existing) {
+      throw new Error(`Short code '${customCode}' already taken`);
     }
 
-    // Base62 approach: Create entry first, then update with Base62 encoded ID
-    // Step 1: Insert with temporary short code
-    const tempCode = `temp_${Date.now()}`;
-    const tempRecord = await urlModel.create({
-      originalUrl,
-      shortCode: tempCode,
-      expiresAt,
+    const created = await urlModel.create({
+      original_url: url,
+      short_code: customCode,
+      expires_at: expiresAt
     });
 
-    // Step 2: Generate Base62 code from auto-incremented ID
-    const shortCode = this.generateShortCodeFromId(tempRecord.id);
-
-    // Step 3: Update with actual Base62 short code
-    const urlRecord = await urlModel.updateShortCode(tempRecord.id, shortCode);
-
-    // Cache in Redis
-    await redisClient.setEx(
-      `url:${shortCode}`,
-      7 * 24 * 60 * 60,
-      originalUrl
-    );
-
-    return {
-      shortCode: urlRecord.short_code,
-      shortUrl: `${process.env.BASE_URL}/${urlRecord.short_code}`,
-      originalUrl: urlRecord.original_url,
-      expiresAt: urlRecord.expires_at,
-      isExisting: false,
-      method: 'base62',
-      databaseId: urlRecord.id,
-    };
+    const cacheKey = `url:${customCode}`;
+    await redisClient.setEx(cacheKey, 3600, url);
+    return created;
   }
 
+  // 4. AUTO-GENERATED PATH (FIXED)
+  const existing = await urlModel.findByOriginalUrl(url);
+  if (existing && !existing.expires_at) {
+    return existing;
+  }
+
+  // ✅ FIX: Generate shortCode FIRST, then insert ONCE
+  const tempId = await urlModel.getNextId(); // Get next ID without inserting
+  const shortCode = base62.encode(tempId);
+  
+  const created = await urlModel.create({
+    original_url: url,
+    short_code: shortCode,  // ✅ Provide short_code upfront
+    expires_at: expiresAt
+  });
+
+  const cacheKey = `url:${shortCode}`;
+  await redisClient.setEx(cacheKey, 3600, url);
+  return created;
+}
+
+
+
+
+
   /**
-   * Get original URL from short code
+   * Cache-Aside Pattern: Redis first → DB fallback → Cache result
+   * TTL: 1 hour (3600s) for hot URLs
    */
   async getOriginalUrl(shortCode) {
-    // Try Redis cache first
-    const cachedUrl = await redisClient.get(`url:${shortCode}`);
-    if (cachedUrl) {
-      // Increment clicks asynchronously
-      urlModel.incrementClicks(shortCode).catch(err => 
-        console.error('Failed to increment clicks:', err)
-      );
-      return cachedUrl;
+    const cacheKey = `url:${shortCode}`;
+
+    try {
+      // 1. CHECK REDIS FIRST
+      const cachedUrl = await redisClient.get(cacheKey);
+      if (cachedUrl) {
+        console.log(`✅ Redis HIT: ${shortCode}`);
+
+        // Async increment clicks (non-blocking)
+        urlModel.incrementClicks(shortCode).catch(err =>
+          console.error('Click increment failed:', err)
+        );
+
+        return cachedUrl;
+      }
+
+      console.log(`🔍 Redis MISS: ${shortCode} → Querying DB`);
+
+      // 2. QUERY DATABASE
+      const urlRecord = await urlModel.findByShortCode(shortCode);
+      if (!urlRecord) {
+        console.log(`❌ URL not found: ${shortCode}`);
+        return null;
+      }
+
+      // 3. CHECK EXPIRATION
+      if (urlRecord.expires_at && new Date(urlRecord.expires_at) < new Date()) {
+        console.log(`⏰ URL expired: ${shortCode}`);
+        return null;
+      }
+
+      const originalUrl = urlRecord.original_url;
+
+      // 4. CACHE IN REDIS (1 hour TTL)
+      await redisClient.setEx(cacheKey, 3600, originalUrl);
+      console.log(`💾 Cached in Redis: ${shortCode}`);
+
+      // 5. INCREMENT CLICKS
+      await urlModel.incrementClicks(shortCode);
+
+      return originalUrl;
+
+    } catch (error) {
+      console.error(`❌ Cache-aside error for ${shortCode}:`, error);
+      // Fallback: try DB directly
+      try {
+        const urlRecord = await urlModel.findByShortCode(shortCode);
+        if (urlRecord) await urlModel.incrementClicks(shortCode);
+        return urlRecord?.original_url || null;
+      } catch (dbError) {
+        console.error('DB fallback failed:', dbError);
+        return null;
+      }
     }
-
-    // Query database
-    const urlRecord = await urlModel.findByShortCode(shortCode);
-    
-    if (!urlRecord) {
-      return null;
-    }
-
-    // Check expiration
-    if (urlRecord.expires_at && new Date(urlRecord.expires_at) < new Date()) {
-      return null;
-    }
-
-    // Cache in Redis
-    await redisClient.setEx(
-      `url:${shortCode}`,
-      7 * 24 * 60 * 60,
-      urlRecord.original_url
-    );
-
-    // Increment clicks
-    await urlModel.incrementClicks(shortCode);
-
-    return urlRecord.original_url;
   }
 
   /**
-   * Get URL statistics
+   * Invalidate cache when URL is created/updated
    */
-  async getUrlStats(shortCode) {
-    const stats = await urlModel.getStats(shortCode);
-    if (!stats) {
-      throw new Error('Short URL not found');
-    }
-    
-    // Add decoded ID information
-    const decodedId = this.decodeShortCode(shortCode);
-    return {
-      ...stats,
-      decodedId,
-    };
+  async invalidateCache(shortCode) {
+    const cacheKey = `url:${shortCode}`;
+    await redisClient.del(cacheKey);
+    console.log(`🗑️ Cache invalidated: ${shortCode}`);
+  }
+
+  /**
+   * Helper: Validate URL format
+   */
+  isValidUrl(url) {
+    return validator.isURL(url, { 
+      require_protocol: true,
+      protocols: ['http', 'https']
+    });
   }
 }
 
