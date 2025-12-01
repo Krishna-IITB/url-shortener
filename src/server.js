@@ -151,6 +151,9 @@ import redisRateLimiter from './middleware/redisRateLimit.js';
 import pool from './config/database.js';
 import redisClient from './config/redis.js';
 
+// const logClick = require('./middleware/analytics');
+
+
 dotenv.config();
 
 // File path helpers

@@ -1,3 +1,4 @@
+// // src/controllers/urlController.js
 // import urlService from '../services/urlService.js';
 
 // class UrlController {
@@ -12,17 +13,48 @@
 //         });
 //       }
 
-//       const result = await urlService.createShortUrl(url, customCode, ttlHours);
+//       // ✅ FIX: Pass as object, not separate arguments
+//       const result = await urlService.createShortUrl({ 
+//         url, 
+//         customCode, 
+//         ttlHours 
+//       });
+
+//       // Build full short URL for response
+//       const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+//       const shortUrl = `${baseUrl}/${result.short_code}`;
 
 //       res.status(201).json({
 //         success: true,
-//         data: result,
+//         data: {
+//           short_code: result.short_code,
+//           short_url: shortUrl,
+//           original_url: result.original_url,
+//           expires_at: result.expires_at,
+//           created_at: result.created_at
+//         }
 //       });
 //     } catch (error) {
 //       console.error('Shorten URL error:', error);
-//       res.status(400).json({
+
+//       // Handle specific error types
+//       if (error.message.includes('Invalid URL')) {
+//         return res.status(400).json({
+//           success: false,
+//           error: error.message,
+//         });
+//       }
+
+//       if (error.message.includes('already taken') || error.message.includes('reserved word')) {
+//         return res.status(409).json({
+//           success: false,
+//           error: error.message,
+//         });
+//       }
+
+//       res.status(500).json({
 //         success: false,
-//         error: error.message,
+//         error: 'Failed to create short URL',
 //       });
 //     }
 //   }
@@ -40,6 +72,8 @@
 //         });
 //       }
 
+//       // 301 = permanent redirect (cached by browsers)
+//       // Use 302 if you want to track every click without caching
 //       res.redirect(301, originalUrl);
 //     } catch (error) {
 //       console.error('Redirect error:', error);
@@ -56,6 +90,13 @@
 
 //       const stats = await urlService.getUrlStats(shortCode);
 
+//       if (!stats) {
+//         return res.status(404).json({
+//           success: false,
+//           error: 'Short URL not found',
+//         });
+//       }
+
 //       res.status(200).json({
 //         success: true,
 //         data: stats,
@@ -64,13 +105,14 @@
 //       console.error('Get stats error:', error);
 //       res.status(404).json({
 //         success: false,
-//         error: error.message,
+//         error: error.message || 'URL not found',
 //       });
 //     }
 //   }
 // }
 
 // export default new UrlController();
+
 
 
 
@@ -90,7 +132,7 @@ class UrlController {
         });
       }
 
-      // ✅ FIX: Pass as object, not separate arguments
+      // ✅ Pass as object, not separate arguments
       const result = await urlService.createShortUrl({ 
         url, 
         customCode, 
@@ -114,7 +156,6 @@ class UrlController {
     } catch (error) {
       console.error('Shorten URL error:', error);
 
-      // Handle specific error types
       if (error.message.includes('Invalid URL')) {
         return res.status(400).json({
           success: false,
@@ -136,11 +177,19 @@ class UrlController {
     }
   }
 
+  // ✅ Corrected redirectUrl with request metadata
   async redirectUrl(req, res) {
     try {
       const { shortCode } = req.params;
 
-      const originalUrl = await urlService.getOriginalUrl(shortCode);
+      // Pass visitor info to service for analytics
+      const meta = {
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        referrer: req.get('Referer') || null
+      };
+
+      const originalUrl = await urlService.getOriginalUrl(shortCode, meta);
 
       if (!originalUrl) {
         return res.status(404).json({
@@ -150,7 +199,6 @@ class UrlController {
       }
 
       // 301 = permanent redirect (cached by browsers)
-      // Use 302 if you want to track every click without caching
       res.redirect(301, originalUrl);
     } catch (error) {
       console.error('Redirect error:', error);
