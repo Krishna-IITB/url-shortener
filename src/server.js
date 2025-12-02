@@ -146,6 +146,11 @@ import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { scheduleExpiredUrlCleanup } from './cron/cleanupExpired.js';
+import cors from 'cors';
+
+
+
 import urlRoutes from './routes/urlRoutes.js';
 import redisRateLimiter from './middleware/redisRateLimit.js';
 import pool from './config/database.js';
@@ -173,6 +178,13 @@ app.use(morgan('combined'));
 // Body parsing
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
+// CORS for frontend at http://localhost:5173
+app.use(cors({
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+}));
 
 // Static files
 app.use(express.static('public'));
@@ -259,11 +271,21 @@ app.use((err, req, res, next) => {
 // -------------------------------
 // Start server
 // -------------------------------
+// app.listen(PORT, () => {
+//   console.log(`🚀 Server running on http://localhost:${PORT}`);
+//   console.log(`📊 Health check: http://localhost:${PORT}/health`);
+//   console.log(`📈 Cache stats: http://localhost:${PORT}/api/cache/stats`);
+//   console.log(`🔗 Ready to shorten URLs!`);
+// });
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`📈 Cache stats: http://localhost:${PORT}/api/cache/stats`);
   console.log(`🔗 Ready to shorten URLs!`);
+
+  // Start daily cleanup job
+  scheduleExpiredUrlCleanup();
 });
+
 
 export default app;

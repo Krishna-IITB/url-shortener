@@ -1,5 +1,12 @@
+
+
+
+
+
+
 // // src/controllers/urlController.js
 // import urlService from '../services/urlService.js';
+// import { generateQrDataUrl } from '../utils/qr.js';
 
 // class UrlController {
 //   async shortenUrl(req, res) {
@@ -13,15 +20,14 @@
 //         });
 //       }
 
-//       // ✅ FIX: Pass as object, not separate arguments
-//       const result = await urlService.createShortUrl({ 
-//         url, 
-//         customCode, 
-//         ttlHours 
+//       const result = await urlService.createShortUrl({
+//         url,
+//         customCode,
+//         ttlHours,
 //       });
 
-//       // Build full short URL for response
-//       const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+//       const baseUrl =
+//         process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
 //       const shortUrl = `${baseUrl}/${result.short_code}`;
 
 //       res.status(201).json({
@@ -31,13 +37,12 @@
 //           short_url: shortUrl,
 //           original_url: result.original_url,
 //           expires_at: result.expires_at,
-//           created_at: result.created_at
-//         }
+//           created_at: result.created_at,
+//         },
 //       });
 //     } catch (error) {
 //       console.error('Shorten URL error:', error);
 
-//       // Handle specific error types
 //       if (error.message.includes('Invalid URL')) {
 //         return res.status(400).json({
 //           success: false,
@@ -45,7 +50,10 @@
 //         });
 //       }
 
-//       if (error.message.includes('already taken') || error.message.includes('reserved word')) {
+//       if (
+//         error.message.includes('already taken') ||
+//         error.message.includes('reserved word')
+//       ) {
 //         return res.status(409).json({
 //           success: false,
 //           error: error.message,
@@ -63,7 +71,13 @@
 //     try {
 //       const { shortCode } = req.params;
 
-//       const originalUrl = await urlService.getOriginalUrl(shortCode);
+//       const meta = {
+//         ip: req.ip,
+//         userAgent: req.get('User-Agent'),
+//         referrer: req.get('Referer') || null,
+//       };
+
+//       const originalUrl = await urlService.getOriginalUrl(shortCode, meta);
 
 //       if (!originalUrl) {
 //         return res.status(404).json({
@@ -72,8 +86,6 @@
 //         });
 //       }
 
-//       // 301 = permanent redirect (cached by browsers)
-//       // Use 302 if you want to track every click without caching
 //       res.redirect(301, originalUrl);
 //     } catch (error) {
 //       console.error('Redirect error:', error);
@@ -109,6 +121,44 @@
 //       });
 //     }
 //   }
+
+//   // ⭐ NEW: Generate QR Code for a short URL
+//   async getQr(req, res) {
+//     try {
+//       const { shortCode } = req.params;
+
+//       // Optional: Check if shortCode exists
+//       let exists = null;
+//       if (urlService.getUrlStats) {
+//         exists = await urlService.getUrlStats(shortCode);
+//       }
+
+//       if (!exists) {
+//         return res.status(404).json({
+//           success: false,
+//           error: 'Short URL not found',
+//         });
+//       }
+
+//       const baseUrl =
+//         process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+//       const targetUrl = `${baseUrl}/${shortCode}`;
+
+//       const dataUrl = await generateQrDataUrl(targetUrl);
+
+//       return res.status(200).json({
+//         success: true,
+//         short_code: shortCode,
+//         qr_data_url: dataUrl,
+//       });
+//     } catch (error) {
+//       console.error('QR code error:', error);
+//       res.status(500).json({
+//         success: false,
+//         error: 'Failed to generate QR code',
+//       });
+//     }
+//   }
 // }
 
 // export default new UrlController();
@@ -116,9 +166,10 @@
 
 
 
-
 // src/controllers/urlController.js
 import urlService from '../services/urlService.js';
+import { generateQrDataUrl } from '../utils/qr.js';
+import urlModel from '../models/urlModel.js'; // <-- added for direct DB check
 
 class UrlController {
   async shortenUrl(req, res) {
@@ -132,15 +183,14 @@ class UrlController {
         });
       }
 
-      // ✅ Pass as object, not separate arguments
-      const result = await urlService.createShortUrl({ 
-        url, 
-        customCode, 
-        ttlHours 
+      const result = await urlService.createShortUrl({
+        url,
+        customCode,
+        ttlHours,
       });
 
-      // Build full short URL for response
-      const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+      const baseUrl =
+        process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
       const shortUrl = `${baseUrl}/${result.short_code}`;
 
       res.status(201).json({
@@ -150,8 +200,8 @@ class UrlController {
           short_url: shortUrl,
           original_url: result.original_url,
           expires_at: result.expires_at,
-          created_at: result.created_at
-        }
+          created_at: result.created_at,
+        },
       });
     } catch (error) {
       console.error('Shorten URL error:', error);
@@ -163,7 +213,10 @@ class UrlController {
         });
       }
 
-      if (error.message.includes('already taken') || error.message.includes('reserved word')) {
+      if (
+        error.message.includes('already taken') ||
+        error.message.includes('reserved word')
+      ) {
         return res.status(409).json({
           success: false,
           error: error.message,
@@ -177,16 +230,14 @@ class UrlController {
     }
   }
 
-  // ✅ Corrected redirectUrl with request metadata
   async redirectUrl(req, res) {
     try {
       const { shortCode } = req.params;
 
-      // Pass visitor info to service for analytics
       const meta = {
         ip: req.ip,
         userAgent: req.get('User-Agent'),
-        referrer: req.get('Referer') || null
+        referrer: req.get('Referer') || null,
       };
 
       const originalUrl = await urlService.getOriginalUrl(shortCode, meta);
@@ -198,7 +249,6 @@ class UrlController {
         });
       }
 
-      // 301 = permanent redirect (cached by browsers)
       res.redirect(301, originalUrl);
     } catch (error) {
       console.error('Redirect error:', error);
@@ -231,6 +281,46 @@ class UrlController {
       res.status(404).json({
         success: false,
         error: error.message || 'URL not found',
+      });
+    }
+  }
+
+  // ⭐ NEW: Generate QR Code for a short URL
+  async getQr(req, res) {
+    try {
+      const { shortCode } = req.params;
+
+      // ✅ Check if shortCode exists via service or directly via urlModel
+      let urlRecord = null;
+      if (urlService.getUrlStats) {
+        urlRecord = await urlService.getUrlStats(shortCode);
+      } else {
+        urlRecord = await urlModel.findByShortCode(shortCode);
+      }
+
+      if (!urlRecord) {
+        return res.status(404).json({
+          success: false,
+          error: 'Short URL not found',
+        });
+      }
+
+      const baseUrl =
+        process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+      const targetUrl = `${baseUrl}/${shortCode}`;
+
+      const dataUrl = await generateQrDataUrl(targetUrl);
+
+      return res.status(200).json({
+        success: true,
+        short_code: shortCode,
+        qr_data_url: dataUrl,
+      });
+    } catch (error) {
+      console.error('QR code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate QR code',
       });
     }
   }
