@@ -259,71 +259,65 @@ class UrlController {
     }
   }
 
-  async getStats(req, res) {
-    try {
-      const { shortCode } = req.params;
+async getStats(req, res) {
+  try {
+    const { shortCode } = req.params;
+    const stats = await urlService.getUrlStats(shortCode);
 
-      const stats = await urlService.getUrlStats(shortCode);
-
-      if (!stats) {
-        return res.status(404).json({
-          success: false,
-          error: 'Short URL not found',
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        data: stats,
-      });
-    } catch (error) {
-      console.error('Get stats error:', error);
-      res.status(404).json({
+    if (!stats) {
+      return res.status(404).json({
         success: false,
-        error: error.message || 'URL not found',
+        error: 'Short URL not found',
       });
     }
+
+    res.status(200).json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    console.error('Get stats error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+    });
   }
+}
+
+
 
   // ⭐ NEW: Generate QR Code for a short URL
-  async getQr(req, res) {
-    try {
-      const { shortCode } = req.params;
+ async getQr(req, res) {
+  try {
+    const { shortCode } = req.params;
 
-      // ✅ Check if shortCode exists via service or directly via urlModel
-      let urlRecord = null;
-      if (urlService.getUrlStats) {
-        urlRecord = await urlService.getUrlStats(shortCode);
-      } else {
-        urlRecord = await urlModel.findByShortCode(shortCode);
-      }
-
-      if (!urlRecord) {
-        return res.status(404).json({
-          success: false,
-          error: 'Short URL not found',
-        });
-      }
-
-      const baseUrl =
-        process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
-      const targetUrl = `${baseUrl}/${shortCode}`;
-
-      const dataUrl = await generateQrDataUrl(targetUrl);
-
-      return res.status(200).json({
-        success: true,
-        short_code: shortCode,
-        qr_data_url: dataUrl,
-      });
-    } catch (error) {
-      console.error('QR code error:', error);
-      res.status(500).json({
+    const urlRecord = await urlModel.findByShortCode(shortCode);
+    if (!urlRecord) {
+      return res.status(404).json({
         success: false,
-        error: 'Failed to generate QR code',
+        error: 'Short URL not found',
       });
     }
+
+    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const targetUrl = `${baseUrl}/${shortCode}`;
+
+    const dataUrl = await generateQrDataUrl(targetUrl);
+
+    return res.status(200).json({
+      success: true,
+      short_code: shortCode,
+      qr_data_url: dataUrl,
+    });
+  } catch (error) {
+    console.error('QR code error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate QR code',
+    });
   }
+}
+
 }
 
 export default new UrlController();
