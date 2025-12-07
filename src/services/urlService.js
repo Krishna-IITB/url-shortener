@@ -1,7 +1,3 @@
-
-
-
-
 // // src/services/urlService.js
 // import validator from 'validator';
 // import urlModel from '../models/urlModel.js';
@@ -105,35 +101,33 @@
 //       return null;
 //     }
 //   }
-// async logClickAsync(shortCode, { ip, userAgent, referrer } = {}) {
-//   console.log('logClickAsync called for', shortCode, 'ip=', ip); // DEBUG
 
-//   (async () => {
-//     try {
-//       const { browser, device_type } = parseUserAgent(userAgent || '');
-//       const country = await lookupCountry(ip);
+//   async logClickAsync(shortCode, { ip, userAgent, referrer } = {}) {
+//     console.log('logClickAsync called for', shortCode, 'ip=', ip); // DEBUG
 
-//       console.log('Inserting click row for', shortCode, 'country=', country); // DEBUG
+//     (async () => {
+//       try {
+//         const { browser, device_type } = parseUserAgent(userAgent || '');
+//         const country = await lookupCountry(ip);
 
-//       await clickModel.logClick({
-//         short_code: shortCode,
-//         ip_address: ip || null,
-//         user_agent: userAgent || null,
-//         referrer: referrer || null,
-//         country,
-//         device_type,
-//         browser
-//       });
+//         console.log('Inserting click row for', shortCode, 'country=', country); // DEBUG
 
-//       await urlModel.incrementClicks(shortCode);
-//     } catch (err) {
-//       console.error('Analytics log failed:', err);
-//     }
-//   })();
-// }
+//         await clickModel.logClick({
+//           short_code: shortCode,
+//           ip_address: ip || null,
+//           user_agent: userAgent || null,
+//           referrer: referrer || null,
+//           country,
+//           device_type,
+//           browser
+//         });
 
-
-
+//         await urlModel.incrementClicks(shortCode);
+//       } catch (err) {
+//         console.error('Analytics log failed:', err);
+//       }
+//     })();
+//   }
 
 //   /**
 //    * Invalidate cache when URL is created/updated
@@ -150,38 +144,51 @@
 //     return validator.isURL(url, { require_protocol: true, protocols: ['http', 'https'] });
 //   }
 
-// async getUrlStats(shortCode) {
-//   const raw = await urlModel.getClickStats(shortCode);
-//   if (!raw) return null;
+//   async getUrlStats(shortCode) {
+//     const raw = await urlModel.getClickStats(shortCode);
+//     if (!raw) return null;
 
-//   const clicksByDate = raw.clicks_by_date || [];
-//   const topCountries = raw.top_countries || [];
-//   const deviceBreakdown = raw.device_breakdown || [];
+//     const clicksByDate = raw.clicks_by_date || [];
+//     const topCountries = raw.top_countries || [];
+//     const deviceBreakdown = raw.device_breakdown || [];
+//     const topReferrers = raw.top_referrers || [];
 
-//   return {
-//     short_code: shortCode,
-//     total_clicks: Number(raw.total_clicks || 0),
-//     unique_ips: Number(raw.unique_ips || 0),
-//     clicks_by_date: clicksByDate.map(item => ({
-//       date: item.date,
-//       clicks: Number(item.clicks || 0),
-//     })),
-//     top_countries: topCountries.map(item => ({
-//       country: item.country,
-//       count: Number(item.count || 0),
-//     })),
-//     device_breakdown: deviceBreakdown.map(item => ({
-//       device_type: item.device_type,
-//       count: Number(item.count || 0),
-//     })),
-//   };
-// }
-
-
-
+//     return {
+//       short_code: shortCode,
+//       total_clicks: Number(raw.total_clicks || 0),
+//       unique_ips: Number(raw.unique_ips || 0),
+//       clicks_by_date: clicksByDate.map(item => ({
+//         date: item.date,
+//         clicks: Number(item.clicks || 0),
+//       })),
+//       top_countries: topCountries.map(item => ({
+//         country: item.country,
+//         count: Number(item.count || 0),
+//       })),
+//       device_breakdown: deviceBreakdown.map(item => ({
+//         device_type: item.device_type,
+//         count: Number(item.count || 0),
+//       })),
+//       top_referrers: topReferrers.map(item => ({
+//         referrer: item.referrer,
+//         count: Number(item.count || 0),
+//       })),
+//     };
+//   }
 // }
 
 // export default new UrlService();
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -233,7 +240,8 @@ class UrlService {
         expires_at: expiresAt
       });
 
-      await redisClient.setEx(`url:${customCode}`, 3600, url);
+      // Cache using popularity-based TTL
+      await this.cacheUrl(customCode, url);
       return created;
     }
 
@@ -250,7 +258,8 @@ class UrlService {
       expires_at: expiresAt
     });
 
-    await redisClient.setEx(`url:${shortCode}`, 3600, url);
+    // Cache using popularity-based TTL
+    await this.cacheUrl(shortCode, url);
     return created;
   }
 
@@ -278,8 +287,8 @@ class UrlService {
 
       const originalUrl = urlRecord.original_url;
 
-      // 4. Cache in Redis
-      await redisClient.setEx(cacheKey, 3600, originalUrl);
+      // 4. Cache in Redis with popularity-based TTL
+      await this.cacheUrl(shortCode, originalUrl);
 
       // 5. Fire-and-forget analytics
       this.logClickAsync(shortCode, reqMeta);
@@ -331,6 +340,35 @@ class UrlService {
    */
   isValidUrl(url) {
     return validator.isURL(url, { require_protocol: true, protocols: ['http', 'https'] });
+  }
+
+  /**
+   * Get total clicks (for popularity-based TTL)
+   */
+  async getClickCount(shortCode) {
+    const raw = await urlModel.getClickStats(shortCode);
+    return Number(raw?.total_clicks || 0);
+  }
+
+  /**
+   * Cache URL in Redis with TTL based on popularity
+   * - >10 clicks → 1 hour
+   * - otherwise → 5 minutes
+   */
+  async cacheUrl(shortCode, originalUrl) {
+    let ttlSeconds = 300; // default 5 minutes
+
+    try {
+      const clickCount = await this.getClickCount(shortCode);
+      if (clickCount > 10) {
+        ttlSeconds = 3600; // 1 hour for popular links
+      }
+    } catch (err) {
+      // If stats lookup fails, keep short TTL
+      ttlSeconds = 300;
+    }
+
+    await redisClient.setEx(`url:${shortCode}`, ttlSeconds, originalUrl);
   }
 
   async getUrlStats(shortCode) {

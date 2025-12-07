@@ -271,21 +271,16 @@ app.use((err, req, res, next) => {
 // -------------------------------
 // Start server
 // -------------------------------
-// app.listen(PORT, () => {
-//   console.log(`🚀 Server running on http://localhost:${PORT}`);
-//   console.log(`📊 Health check: http://localhost:${PORT}/health`);
-//   console.log(`📈 Cache stats: http://localhost:${PORT}/api/cache/stats`);
-//   console.log(`🔗 Ready to shorten URLs!`);
-// });
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`📈 Cache stats: http://localhost:${PORT}/api/cache/stats`);
-  console.log(`🔗 Ready to shorten URLs!`);
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    console.log(`📈 Cache stats: http://localhost:${PORT}/api/cache/stats`);
+    console.log(`🔗 Ready to shorten URLs!`);
 
-  // Start daily cleanup job
-  scheduleExpiredUrlCleanup();
-});
-
+    // Start daily cleanup job
+    scheduleExpiredUrlCleanup();
+  });
+}
 
 export default app;

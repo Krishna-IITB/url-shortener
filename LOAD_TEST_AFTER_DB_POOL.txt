@@ -1,0 +1,30 @@
+=== BASELINE LOAD TEST ===
+Running 30s test @ http://localhost:3000/api/shorten
+  12 threads and 1000 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    89.41ms  123.02ms   2.00s    89.85%
+    Req/Sec     1.33k   327.19     2.52k    72.68%
+  472571 requests in 30.07s, 517.54MB read
+  Non-2xx or 3xx responses: 445661
+Requests/sec:  15716.27
+Transfer/sec:     17.21MB
+
+=== SINGLE ENDPOINT TESTS ===
+Running 15s test @ http://localhost:3000/api/shorten
+  4 threads and 200 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    12.39ms   10.57ms 312.54ms   96.23%
+    Req/Sec     4.37k   630.47    11.26k    87.50%
+  261874 requests in 15.10s, 286.00MB read
+  Non-2xx or 3xx responses: 258081
+Requests/sec:  17345.39
+Transfer/sec:     18.94MB
+Running 15s test @ http://localhost:3000/abc123
+  4 threads and 500 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    54.14ms   26.33ms 306.40ms   91.64%
+    Req/Sec     2.41k   615.28     3.50k    75.50%
+  144336 requests in 15.06s, 140.82MB read
+  Non-2xx or 3xx responses: 144336
+Requests/sec:   9582.04
+Transfer/sec:      9.35MB
