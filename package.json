@@ -3,18 +3,26 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
-    "test:coverage": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --runInBand",
-    "test:integration": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration --coverage --runInBand",
-    "test:unit": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests --testPathIgnorePatterns=tests/integration --coverage --runInBand",
-    "migrate:create": "node-pg-migrate create -j js -f database.json",
-    "migrate:up": "node-pg-migrate up -f database.json",
-    "migrate:down": "node-pg-migrate down -f database.json",
-    "prod": "NODE_ENV=production npm start"
-  },
+"scripts": {
+  "start": "NODE_ENV=production node src/server.js",
+  "dev": "NODE_ENV=development nodemon src/server.js",
+
+  "test": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+  "test:coverage": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --runInBand",
+  "test:integration": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration --coverage --runInBand",
+  "test:unit": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests --testPathIgnorePatterns=tests/integration --coverage --runInBand",
+
+  "migrate:create": "node-pg-migrate create -j js -f database.json",
+  "migrate:up": "node-pg-migrate up -f database.json",
+  "migrate:down": "node-pg-migrate down -f database.json",
+
+  "prod": "NODE_ENV=production npm start",
+
+  "docker:build": "docker-compose build",
+  "docker:up": "docker-compose up -d",
+  "docker:down": "docker-compose down",
+  "docker:logs": "docker-compose logs -f"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -27,6 +35,7 @@
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
+    "express-slow-down": "^3.0.1",
     "glob": "^11.1.0",
     "helmet": "^8.1.0",
     "ipapi.co": "^0.3.0",
@@ -35,6 +44,7 @@
     "node-cron": "^4.2.1",
     "node-pg-migrate": "^7.9.1",
     "pg": "^8.16.3",
+    "pg-types": "^4.1.0",
     "qrcode": "^1.5.4",
     "react-router-dom": "^7.9.6",
     "redis": "^5.10.0",

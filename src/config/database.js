@@ -1,3 +1,4 @@
+// // src/config/database.js
 // import pg from 'pg';
 // import dotenv from 'dotenv';
 
@@ -6,11 +7,14 @@
 // const { Pool } = pg;
 
 // const pool = new Pool({
-//   host: process.env.DB_HOST,
-//   port: process.env.DB_PORT,
-//   database: process.env.DB_NAME,
-//   user: process.env.DB_USER,
-//   password: process.env.DB_PASSWORD,
+//   host: process.env.DB_HOST || 'localhost',
+//   port: process.env.DB_PORT || 5432,
+//   database: process.env.DB_NAME || 'url_shortener',
+//   user: process.env.DB_USER || 'postgres',
+//   password: process.env.DB_PASSWORD || '',
+//   max: 20,                  // max clients in pool (default is 10) [web:173][web:177]
+//   idleTimeoutMillis: 30000, // close idle clients after 30s idle
+//   connectionTimeoutMillis: 2000, // 2s to get a connection from pool
 // });
 
 // pool.on('connect', () => {
@@ -23,6 +27,9 @@
 // });
 
 // export default pool;
+
+
+
 
 
 
@@ -42,13 +49,16 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'url_shortener',
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || '',
-  max: 20,                  // max clients in pool (default is 10) [web:173][web:177]
-  idleTimeoutMillis: 30000, // close idle clients after 30s idle
-  connectionTimeoutMillis: 2000, // 2s to get a connection from pool
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL database');
+  // ✅ Fixed - Silence in test environment
+  if (process.env.NODE_ENV !== 'test') {
+    console.log('✅ Connected to PostgreSQL database');
+  }
 });
 
 pool.on('error', (err) => {

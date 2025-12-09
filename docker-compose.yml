@@ -1,12 +1,41 @@
-version: '3.8'
 services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .docker.env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: urlshortener          # ← FIX 1: Creates DB
+      POSTGRES_USER: postgres            # ← FIX 2: Creates user  
+      POSTGRES_PASSWORD: securepassword123 # ← FIX 3: Sets password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
   redis:
     image: redis:7-alpine
-    container_name: url-shortener-redis
     ports:
       - "6379:6379"
     volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-      - ./redis-data:/data
-    command: redis-server /usr/local/etc/redis/redis.conf
+      - redis_data:/data
     restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

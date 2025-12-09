@@ -1,255 +1,99 @@
-
-
-
-
-// // src/server.js
 // import express from 'express';
-// import dotenv from 'dotenv';
-// import compression from 'compression';
-// import helmet from 'helmet';
-// import morgan from 'morgan';
-// import path from 'path';
-// import { fileURLToPath } from 'url';
-
+// import { securityMiddleware } from './middleware/security.js';
+// import corsMiddleware from './middleware/cors.js';
+// import httpsRedirect from './middleware/httpsRedirect.js';
 // import urlRoutes from './routes/urlRoutes.js';
-// import redisRateLimiter from './middleware/redisRateLimit.js'; // keep this name consistent
-// import pool from './config/database.js';
-// import redisClient from './config/redis.js';
-
-// dotenv.config();
-
-// // File path helpers
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+// // Add your other imports here
 
 // const app = express();
-// const PORT = process.env.PORT || 3000;
 
-// // -------------------------------
-// // Production middleware
-// // -------------------------------
-// app.use(helmet());
-// app.use(compression());
-// app.use(morgan('combined'));
+// // 1. Security first
+// securityMiddleware.forEach(mw => app.use(mw));
 
-// // Body parsing
-// app.use(express.json({ limit: '10kb' }));
-// app.use(express.urlencoded({ extended: true }));
+// // 2. CORS
+// app.use(corsMiddleware);
 
-// // Static files
-// app.use(express.static('public'));
+// // 3. HTTPS redirect (prod only)
+// if (process.env.NODE_ENV === 'production') {
+//   app.use(httpsRedirect);
+// }
 
-// // -------------------------------
-// // Health check (UNLIMITED or lightly protected)
-// // -------------------------------
+// // 4. Routes
+// app.use('/api', urlRoutes);
+
+// // Health check
 // app.get('/health', (req, res) => {
-//   res.status(200).json({
-//     status: 'OK',
-//     timestamp: new Date().toISOString(),
-//     uptime: process.uptime(),
-//     environment: process.env.NODE_ENV || 'development'
-//   });
+//   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 // });
 
-// // -------------------------------
-// // RATE LIMITING
-// // -------------------------------
-// // 100 req/min per IP for all /api endpoints
-// app.use('/api', redisRateLimiter);
-
-// // Optional: if you want to rate‑limit redirects by short code, do it
-// // inside urlRoutes instead of globally with '/:shortCode' so you
-// // don't accidentally hit unrelated 1‑segment paths like /health.[web:86][web:97]
-
-// // -------------------------------
-// // Logger (custom)
-// // -------------------------------
-// app.use((req, res, next) => {
-//   console.log(
-//     `${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`
-//   );
-//   next();
-// });
-
-// // -------------------------------
-// // Cache stats (protected by /api limiter)
-// // -------------------------------
-// app.get('/api/cache/stats', async (req, res) => {
-//   try {
-//     const info = await redisClient.info();
-
-//     const stats = {
-//       keys: await redisClient.dbsize(),
-//       memory: info.split('\n')
-//         .find(l => l.includes('used_memory_human'))
-//         ?.split(':')[1]
-//         ?.trim(),
-//       policy: info.split('\n')
-//         .find(l => l.includes('maxmemory_policy'))
-//         ?.split(':')[1]
-//         ?.trim(),
-//     };
-
-//     res.json({ success: true, data: stats });
-//   } catch (e) {
-//     res.json({ success: false, error: e.message });
-//   }
-// });
-
-// // -------------------------------
-// // Routes (shortener etc.)
-// // -------------------------------
-// app.use('/', urlRoutes);
-
-// // -------------------------------
-// // 404 handler
-// // -------------------------------
-// app.use((req, res) => {
-//   res.status(404).json({
-//     success: false,
-//     error: 'Route not found'
-//   });
-// });
-
-// // -------------------------------
-// // Error handler
-// // -------------------------------
+// // 5. Error handler (catch-all)
 // app.use((err, req, res, next) => {
 //   console.error(err.stack);
-//   res.status(500).json({
-//     success: false,
-//     error: 'Internal server error'
+//   res.status(500).json({ 
+//     success: false, 
+//     error: 'Internal server error' 
 //   });
 // });
 
-// // -------------------------------
-// // Start server
-// // -------------------------------
+// const PORT = process.env.PORT || 3000;
 // app.listen(PORT, () => {
-//   console.log(`🚀 Server running on http://localhost:${PORT}`);
-//   console.log(`📊 Health check: http://localhost:${PORT}/health`);
-//   console.log(`📈 Cache stats: http://localhost:${PORT}/api/cache/stats`);
-//   console.log(`🔗 Ready to shorten URLs!`);
+//   console.log(`🚀 Server running on port ${PORT}`);
 // });
 
 // export default app;
+// app.set('trust proxy', 1);
 
 
 
 
-// src/server.js
+
+
+
 import express from 'express';
 import dotenv from 'dotenv';
-import compression from 'compression';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-import { scheduleExpiredUrlCleanup } from './cron/cleanupExpired.js';
-import cors from 'cors';
-
-
-
-import urlRoutes from './routes/urlRoutes.js';
-import redisRateLimiter from './middleware/redisRateLimit.js';
-import pool from './config/database.js';
-import redisClient from './config/redis.js';
-
-// const logClick = require('./middleware/analytics');
-
-
+// Load environment variables first
 dotenv.config();
 
-// File path helpers
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Import middleware
+import { securityMiddleware } from './middleware/security.js';
+import corsMiddleware from './middleware/cors.js';
+import httpsRedirect from './middleware/httpsRedirect.js';
+
+// Import routes
+import urlRoutes from './routes/urlRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// -------------------------------
-// Production middleware
-// -------------------------------
-app.use(helmet());
-app.use(compression());
-app.use(morgan('combined'));
+// ⭐ CRITICAL: Trust proxy MUST be set before any middleware
+app.set('trust proxy', 1);
 
-// Body parsing
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true }));
-// CORS for frontend at http://localhost:5173
-app.use(cors({
-  origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false,
-}));
+// 1. HTTPS redirect (production only) - should be first
+if (process.env.NODE_ENV === 'production') {
+  app.use(httpsRedirect);
+}
 
-// Static files
-app.use(express.static('public'));
+// 2. Security middleware (helmet, rate limit, body parser, etc.)
+securityMiddleware.forEach(mw => app.use(mw));
 
-// -------------------------------
-// Health check (NOT rate-limited)
-// -------------------------------
+// 3. CORS
+app.use(corsMiddleware);
+
+// 4. Health check (before rate-limited routes)
 app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString() 
   });
 });
 
-// -------------------------------
-// RATE LIMITING
-// -------------------------------
-// 100 req/min per IP for all /api endpoints
-app.use('/api', redisRateLimiter);
+// 5. API Routes
+app.use('/api', urlRoutes);
 
-// -------------------------------
-// Logger (custom)
-// -------------------------------
-app.use((req, res, next) => {
-  console.log(
-    `${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`
-  );
-  next();
-});
-
-// -------------------------------
-// Cache stats (protected by /api limiter)
-// -------------------------------
-app.get('/api/cache/stats', async (req, res) => {
-  try {
-    const info = await redisClient.info();
-
-    const stats = {
-      keys: await redisClient.dbsize(),
-      memory: info.split('\n')
-        .find(l => l.includes('used_memory_human'))
-        ?.split(':')[1]
-        ?.trim(),
-      policy: info.split('\n')
-        .find(l => l.includes('maxmemory_policy'))
-        ?.split(':')[1]
-        ?.trim(),
-    };
-
-    res.json({ success: true, data: stats });
-  } catch (e) {
-    res.json({ success: false, error: e.message });
-  }
-});
-
-// -------------------------------
-// Routes (shortener etc.)
-// -------------------------------
+// 6. Redirect routes (shortCode handling)
 app.use('/', urlRoutes);
 
-// -------------------------------
-// 404 handler
-// -------------------------------
+// 7. 404 handler (if no route matched)
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -257,30 +101,46 @@ app.use((req, res) => {
   });
 });
 
-// -------------------------------
-// Error handler
-// -------------------------------
+// 8. Global error handler (must be last)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error'
+  if (process.env.NODE_ENV !== "test") console.error('Global error:', err.stack);
+  
+  // Handle specific errors
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+  
+  if (err.message && err.message.includes('CORS')) {
+    return res.status(403).json({
+      success: false,
+      error: 'CORS policy violation'
+    });
+  }
+  
+  res.status(500).json({ 
+    success: false, 
+    error: 'Internal server error' 
   });
 });
 
-// -------------------------------
-// Start server
-// -------------------------------
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`📈 Cache stats: http://localhost:${PORT}/api/cache/stats`);
-    console.log(`🔗 Ready to shorten URLs!`);
+const PORT = process.env.PORT || 3000;
 
-    // Start daily cleanup job
-    scheduleExpiredUrlCleanup();
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, closing server gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
   });
-}
+});
 
 export default app;
+export { server };

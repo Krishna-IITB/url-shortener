@@ -44,7 +44,8 @@
 //         expires_at: expiresAt
 //       });
 
-//       await redisClient.setEx(`url:${customCode}`, 3600, url);
+//       // Cache using popularity-based TTL
+//       await this.cacheUrl(customCode, url);
 //       return created;
 //     }
 
@@ -61,7 +62,8 @@
 //       expires_at: expiresAt
 //     });
 
-//     await redisClient.setEx(`url:${shortCode}`, 3600, url);
+//     // Cache using popularity-based TTL
+//     await this.cacheUrl(shortCode, url);
 //     return created;
 //   }
 
@@ -89,8 +91,8 @@
 
 //       const originalUrl = urlRecord.original_url;
 
-//       // 4. Cache in Redis
-//       await redisClient.setEx(cacheKey, 3600, originalUrl);
+//       // 4. Cache in Redis with popularity-based TTL
+//       await this.cacheUrl(shortCode, originalUrl);
 
 //       // 5. Fire-and-forget analytics
 //       this.logClickAsync(shortCode, reqMeta);
@@ -144,6 +146,35 @@
 //     return validator.isURL(url, { require_protocol: true, protocols: ['http', 'https'] });
 //   }
 
+//   /**
+//    * Get total clicks (for popularity-based TTL)
+//    */
+//   async getClickCount(shortCode) {
+//     const raw = await urlModel.getClickStats(shortCode);
+//     return Number(raw?.total_clicks || 0);
+//   }
+
+//   /**
+//    * Cache URL in Redis with TTL based on popularity
+//    * - >10 clicks → 1 hour
+//    * - otherwise → 5 minutes
+//    */
+//   async cacheUrl(shortCode, originalUrl) {
+//     let ttlSeconds = 300; // default 5 minutes
+
+//     try {
+//       const clickCount = await this.getClickCount(shortCode);
+//       if (clickCount > 10) {
+//         ttlSeconds = 3600; // 1 hour for popular links
+//       }
+//     } catch (err) {
+//       // If stats lookup fails, keep short TTL
+//       ttlSeconds = 300;
+//     }
+
+//     await redisClient.setEx(`url:${shortCode}`, ttlSeconds, originalUrl);
+//   }
+
 //   async getUrlStats(shortCode) {
 //     const raw = await urlModel.getClickStats(shortCode);
 //     if (!raw) return null;
@@ -178,6 +209,16 @@
 // }
 
 // export default new UrlService();
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -273,7 +314,10 @@ class UrlService {
       // 1. Redis first
       const cachedUrl = await redisClient.get(cacheKey);
       if (cachedUrl) {
-        console.log(`✅ Redis HIT: ${shortCode}`);
+        // Only log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`✅ Redis HIT: ${shortCode}`);
+        }
         this.logClickAsync(shortCode, reqMeta); // non-blocking
         return cachedUrl;
       }
@@ -300,15 +344,26 @@ class UrlService {
     }
   }
 
+  /**
+   * Log click analytics asynchronously (fire-and-forget)
+   * Failures won't break redirects
+   */
   async logClickAsync(shortCode, { ip, userAgent, referrer } = {}) {
-    console.log('logClickAsync called for', shortCode, 'ip=', ip); // DEBUG
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('logClickAsync called for', shortCode, 'ip=', ip);
+    }
 
+    // Fire-and-forget - don't block the main thread
     (async () => {
       try {
         const { browser, device_type } = parseUserAgent(userAgent || '');
         const country = await lookupCountry(ip);
 
-        console.log('Inserting click row for', shortCode, 'country=', country); // DEBUG
+        // Only log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Inserting click row for', shortCode, 'country=', country);
+        }
 
         await clickModel.logClick({
           short_code: shortCode,
@@ -322,7 +377,8 @@ class UrlService {
 
         await urlModel.incrementClicks(shortCode);
       } catch (err) {
-        console.error('Analytics log failed:', err);
+        console.error('Analytics log failed:', err.message);
+        // Don't throw - logging failures shouldn't break redirects
       }
     })();
   }
@@ -332,7 +388,11 @@ class UrlService {
    */
   async invalidateCache(shortCode) {
     await redisClient.del(`url:${shortCode}`);
-    console.log(`🗑️ Cache invalidated: ${shortCode}`);
+    
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🗑️ Cache invalidated: ${shortCode}`);
+    }
   }
 
   /**
@@ -371,6 +431,9 @@ class UrlService {
     await redisClient.setEx(`url:${shortCode}`, ttlSeconds, originalUrl);
   }
 
+  /**
+   * Get comprehensive URL statistics
+   */
   async getUrlStats(shortCode) {
     const raw = await urlModel.getClickStats(shortCode);
     if (!raw) return null;
