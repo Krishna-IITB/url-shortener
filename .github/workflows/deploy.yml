@@ -1,0 +1,97 @@
+# name: CI/CD - URL Shortener
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# jobs:
+#   lint-test-build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - name: Install dependencies
+#         run: npm ci
+
+#       - name: Lint
+#         run: npm run lint || echo "no lint script, skipping"
+
+#       - name: Run tests
+#         run: npm test -- --coverage
+
+#       - name: Docker build (ensure image builds)
+#         run: docker build -t url-shortener-app .
+
+#   deploy:
+#     needs: lint-test-build
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Deploy to Railway
+#         uses: railwayapp/action-deploy@v1
+#         with:
+#           railwayToken: ${{ secrets.RAILWAY_TOKEN }}
+
+
+
+
+
+name: CI/CD - URL Shortener
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint || echo "no lint script, skipping"
+
+      - name: Run tests
+        run: npm test -- --coverage
+
+      - name: Docker build (ensure image builds)
+        run: docker build -t url-shortener-app .
+
+  deploy:
+    needs: lint-test-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Railway
+        uses: railwayapp/action-deploy@v1
+        with:
+          railwayToken: ${{ secrets.RAILWAY_TOKEN }}
