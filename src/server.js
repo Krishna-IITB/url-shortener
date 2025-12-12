@@ -93,6 +93,19 @@ app.use('/api', urlRoutes);
 // 6. Redirect routes (shortCode handling)
 app.use('/', urlRoutes);
 
+
+// 6.5 Root landing route (for browser)
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'URL Shortener backend is running',
+    health: '/health',
+    shorten_endpoint: '/api/shorten',
+    analytics_example: '/api/stats/{shortCode}'
+  });
+});
+
+
 // 7. 404 handler (if no route matched)
 app.use((req, res) => {
   res.status(404).json({
@@ -126,12 +139,23 @@ app.use((err, req, res, next) => {
   });
 });
 
+// const PORT = process.env.PORT || 3000;
+
+// const server = app.listen(PORT, () => {
+//   console.log(`🚀 Server running on port ${PORT}`);
+//   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+// });
+
 const PORT = process.env.PORT || 3000;
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
+
+
+
+
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
