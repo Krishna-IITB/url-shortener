@@ -1,6 +1,7 @@
-// const axios = require('axios');
-// const UAParser = require('ua-parser-js');
-// const pool = require('../db'); // adjust if your db file path is different
+// import axios from 'axios';
+// import { UAParser } from 'ua-parser-js';
+
+// import pool from '../config/database.js';
 
 // async function lookupGeo(ip) {
 //   try {
@@ -14,7 +15,7 @@
 //   }
 // }
 
-// const logClick = (req, res, next) => {
+// const analyticsMiddleware = async (req, res, next) => {
 //   const { shortCode } = req.params;
 
 //   const ip =
@@ -30,6 +31,7 @@
 //   const os = parser.getOS();
 //   const deviceType = `${device.type || 'desktop'} ${os.name || 'unknown'}`;
 
+//   // Log click asynchronously (don't wait for it)
 //   (async () => {
 //     try {
 //       const { city, country } =
@@ -42,18 +44,17 @@
 //          VALUES ($1, $2, $3, $4, $5, NOW())`,
 //         [shortCode, `${ip} (${city}, ${country})`, userAgent, referer, deviceType]
 //       );
+      
+//       console.log(`✅ Analytics logged for: ${shortCode}`);
 //     } catch (err) {
-//       console.error('Analytics logging error:', err.message);
+//       console.error('Analytics log failed:', err.message);
 //     }
 //   })();
 
 //   next();
 // };
 
-// module.exports = logClick;
-
-
-
+// export default analyticsMiddleware;
 
 
 
@@ -64,7 +65,6 @@
 
 import axios from 'axios';
 import { UAParser } from 'ua-parser-js';
-
 import pool from '../config/database.js';
 
 async function lookupGeo(ip) {
@@ -103,10 +103,17 @@ const analyticsMiddleware = async (req, res, next) => {
           ? { city: 'unknown', country: 'unknown' }
           : await lookupGeo(ip);
 
+      // Insert click record
       await pool.query(
         `INSERT INTO clicks (short_code, ip_address, user_agent, referer, device_type, clicked_at)
          VALUES ($1, $2, $3, $4, $5, NOW())`,
         [shortCode, `${ip} (${city}, ${country})`, userAgent, referer, deviceType]
+      );
+
+      // Increment click counter in urls table
+      await pool.query(
+        `UPDATE urls SET clicks = clicks + 1 WHERE short_code = $1`,
+        [shortCode]
       );
       
       console.log(`✅ Analytics logged for: ${shortCode}`);

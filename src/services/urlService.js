@@ -77,7 +77,10 @@
 //       // 1. Redis first
 //       const cachedUrl = await redisClient.get(cacheKey);
 //       if (cachedUrl) {
-//         console.log(`✅ Redis HIT: ${shortCode}`);
+//         // Only log in development
+//         if (process.env.NODE_ENV === 'development') {
+//           console.log(`✅ Redis HIT: ${shortCode}`);
+//         }
 //         this.logClickAsync(shortCode, reqMeta); // non-blocking
 //         return cachedUrl;
 //       }
@@ -104,15 +107,26 @@
 //     }
 //   }
 
+//   /**
+//    * Log click analytics asynchronously (fire-and-forget)
+//    * Failures won't break redirects
+//    */
 //   async logClickAsync(shortCode, { ip, userAgent, referer } = {}) {
-//     console.log('logClickAsync called for', shortCode, 'ip=', ip); // DEBUG
+//     // Only log in development
+//     if (process.env.NODE_ENV === 'development') {
+//       console.log('logClickAsync called for', shortCode, 'ip=', ip);
+//     }
 
+//     // Fire-and-forget - don't block the main thread
 //     (async () => {
 //       try {
 //         const { browser, device_type } = parseUserAgent(userAgent || '');
 //         const country = await lookupCountry(ip);
 
-//         console.log('Inserting click row for', shortCode, 'country=', country); // DEBUG
+//         // Only log in development
+//         if (process.env.NODE_ENV === 'development') {
+//           console.log('Inserting click row for', shortCode, 'country=', country);
+//         }
 
 //         await clickModel.logClick({
 //           short_code: shortCode,
@@ -126,7 +140,8 @@
 
 //         await urlModel.incrementClicks(shortCode);
 //       } catch (err) {
-//         console.error('Analytics log failed:', err);
+//         console.error('Analytics log failed:', err.message);
+//         // Don't throw - logging failures shouldn't break redirects
 //       }
 //     })();
 //   }
@@ -136,7 +151,11 @@
 //    */
 //   async invalidateCache(shortCode) {
 //     await redisClient.del(`url:${shortCode}`);
-//     console.log(`🗑️ Cache invalidated: ${shortCode}`);
+    
+//     // Only log in development
+//     if (process.env.NODE_ENV === 'development') {
+//       console.log(`🗑️ Cache invalidated: ${shortCode}`);
+//     }
 //   }
 
 //   /**
@@ -175,6 +194,9 @@
 //     await redisClient.setEx(`url:${shortCode}`, ttlSeconds, originalUrl);
 //   }
 
+//   /**
+//    * Get comprehensive URL statistics
+//    */
 //   async getUrlStats(shortCode) {
 //     const raw = await urlModel.getClickStats(shortCode);
 //     if (!raw) return null;
@@ -209,27 +231,6 @@
 // }
 
 // export default new UrlService();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -305,7 +306,8 @@ class UrlService {
   }
 
   /**
-   * Get original URL (with cache-aside pattern) and log analytics asynchronously
+   * Get original URL (with cache-aside pattern)
+   * Analytics logging is handled by middleware
    */
   async getOriginalUrl(shortCode, reqMeta = {}) {
     const cacheKey = `url:${shortCode}`;
@@ -318,7 +320,7 @@ class UrlService {
         if (process.env.NODE_ENV === 'development') {
           console.log(`✅ Redis HIT: ${shortCode}`);
         }
-        this.logClickAsync(shortCode, reqMeta); // non-blocking
+        // Analytics middleware handles logging
         return cachedUrl;
       }
 
@@ -334,53 +336,13 @@ class UrlService {
       // 4. Cache in Redis with popularity-based TTL
       await this.cacheUrl(shortCode, originalUrl);
 
-      // 5. Fire-and-forget analytics
-      this.logClickAsync(shortCode, reqMeta);
+      // Analytics middleware handles logging
 
       return originalUrl;
     } catch (err) {
       console.error(`❌ Error fetching ${shortCode}:`, err);
       return null;
     }
-  }
-
-  /**
-   * Log click analytics asynchronously (fire-and-forget)
-   * Failures won't break redirects
-   */
-  async logClickAsync(shortCode, { ip, userAgent, referer } = {}) {
-    // Only log in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('logClickAsync called for', shortCode, 'ip=', ip);
-    }
-
-    // Fire-and-forget - don't block the main thread
-    (async () => {
-      try {
-        const { browser, device_type } = parseUserAgent(userAgent || '');
-        const country = await lookupCountry(ip);
-
-        // Only log in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Inserting click row for', shortCode, 'country=', country);
-        }
-
-        await clickModel.logClick({
-          short_code: shortCode,
-          ip_address: ip || null,
-          user_agent: userAgent || null,
-          referer: referer || null,
-          country,
-          device_type,
-          browser
-        });
-
-        await urlModel.incrementClicks(shortCode);
-      } catch (err) {
-        console.error('Analytics log failed:', err.message);
-        // Don't throw - logging failures shouldn't break redirects
-      }
-    })();
   }
 
   /**
