@@ -4,7 +4,7 @@
 //   'http://localhost:3000',
 //   'http://localhost:5173',  // Vite dev server
 //   'http://localhost:5174',
-//   process.env.FRONTEND_URL || 'https://yourdomain.com'
+//   process.env.FRONTEND_URL
 // ].filter(Boolean);
 
 // const corsOptions = {
@@ -35,14 +35,14 @@
 
 
 
-
-
 import cors from 'cors';
 
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',  // Vite dev server
   'http://localhost:5174',
+  'https://url-shortener-phi-peach.vercel.app',  // ✅ Your Vercel URL
+  'https://url-shortener-git-peach-krishnas-projects-d225facb.vercel.app',  // ✅ Vercel preview URL
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
