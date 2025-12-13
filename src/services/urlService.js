@@ -104,7 +104,7 @@
 //     }
 //   }
 
-//   async logClickAsync(shortCode, { ip, userAgent, referrer } = {}) {
+//   async logClickAsync(shortCode, { ip, userAgent, referer } = {}) {
 //     console.log('logClickAsync called for', shortCode, 'ip=', ip); // DEBUG
 
 //     (async () => {
@@ -118,7 +118,7 @@
 //           short_code: shortCode,
 //           ip_address: ip || null,
 //           user_agent: userAgent || null,
-//           referrer: referrer || null,
+//           referer: referer || null,
 //           country,
 //           device_type,
 //           browser
@@ -182,7 +182,7 @@
 //     const clicksByDate = raw.clicks_by_date || [];
 //     const topCountries = raw.top_countries || [];
 //     const deviceBreakdown = raw.device_breakdown || [];
-//     const topReferrers = raw.top_referrers || [];
+//     const topReferrers = raw.top_referers || [];
 
 //     return {
 //       short_code: shortCode,
@@ -200,8 +200,8 @@
 //         device_type: item.device_type,
 //         count: Number(item.count || 0),
 //       })),
-//       top_referrers: topReferrers.map(item => ({
-//         referrer: item.referrer,
+//       top_referers: topReferrers.map(item => ({
+//         referer: item.referer,
 //         count: Number(item.count || 0),
 //       })),
 //     };
@@ -348,7 +348,7 @@ class UrlService {
    * Log click analytics asynchronously (fire-and-forget)
    * Failures won't break redirects
    */
-  async logClickAsync(shortCode, { ip, userAgent, referrer } = {}) {
+  async logClickAsync(shortCode, { ip, userAgent, referer } = {}) {
     // Only log in development
     if (process.env.NODE_ENV === 'development') {
       console.log('logClickAsync called for', shortCode, 'ip=', ip);
@@ -369,7 +369,7 @@ class UrlService {
           short_code: shortCode,
           ip_address: ip || null,
           user_agent: userAgent || null,
-          referrer: referrer || null,
+          referer: referer || null,
           country,
           device_type,
           browser
@@ -441,7 +441,7 @@ class UrlService {
     const clicksByDate = raw.clicks_by_date || [];
     const topCountries = raw.top_countries || [];
     const deviceBreakdown = raw.device_breakdown || [];
-    const topReferrers = raw.top_referrers || [];
+    const topReferrers = raw.top_referers || [];
 
     return {
       short_code: shortCode,
@@ -459,8 +459,8 @@ class UrlService {
         device_type: item.device_type,
         count: Number(item.count || 0),
       })),
-      top_referrers: topReferrers.map(item => ({
-        referrer: item.referrer,
+      top_referers: topReferrers.map(item => ({
+        referer: item.referer,
         count: Number(item.count || 0),
       })),
     };

@@ -23,7 +23,7 @@ const logClick = (req, res, next) => {
     'unknown';
 
   const userAgent = req.get('User-Agent') || 'unknown';
-  const referrer = req.get('Referer') || null;
+  const referer = req.get('Referer') || null;
 
   const parser = new UAParser(userAgent);
   const device = parser.getDevice();
@@ -38,9 +38,9 @@ const logClick = (req, res, next) => {
           : await lookupGeo(ip);
 
       await pool.query(
-        `INSERT INTO clicks (short_code, ip_address, user_agent, referrer, device_type, clicked_at)
+        `INSERT INTO clicks (short_code, ip_address, user_agent, referer, device_type, clicked_at)
          VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [shortCode, `${ip} (${city}, ${country})`, userAgent, referrer, deviceType]
+        [shortCode, `${ip} (${city}, ${country})`, userAgent, referer, deviceType]
       );
     } catch (err) {
       console.error('Analytics logging error:', err.message);

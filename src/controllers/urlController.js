@@ -81,7 +81,7 @@
 //       const meta = {
 //         ip: req.ip,
 //         userAgent: req.get('User-Agent'),
-//         referrer: req.get('Referer') || null,
+//         referer: req.get('Referer') || null,
 //       };
 
 //       const originalUrl = await urlService.getOriginalUrl(shortCode, meta);
@@ -329,7 +329,7 @@ class UrlController {
       const meta = {
         ip: req.ip,
         userAgent: req.get('User-Agent'),
-        referrer: req.get('Referer') || null,
+        referer: req.get('Referer') || null,
       };
 
       const originalUrl = await urlService.getOriginalUrl(sanitizedCode, meta);

@@ -5,14 +5,14 @@ class ClickModel {
     short_code,
     ip_address,
     user_agent,
-    referrer,
+    referer,
     country,
     device_type,
     browser
   }) {
     const query = `
       INSERT INTO clicks (
-        short_code, ip_address, user_agent, referrer,
+        short_code, ip_address, user_agent, referer,
         country, device_type, browser
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -22,7 +22,7 @@ class ClickModel {
       short_code,
       ip_address,
       user_agent,
-      referrer,
+      referer,
       country,
       device_type,
       browser
