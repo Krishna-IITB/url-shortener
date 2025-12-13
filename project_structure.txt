@@ -1,0 +1,115 @@
+.
+├── #
+├── database.json
+├── database.json.bak
+├── docker-compose.yml
+├── docker-compose.yml.bak
+├── Dockerfile
+├── github
+├── init.sql
+├── jest.config.js
+├── LOAD_TEST_AFTER_DB_POOL.txt
+├── LOAD_TEST_AFTER_DB_REDIS.txt
+├── LOAD_TEST_RESULTS.md
+├── load-script.lua
+├── load-test.sh
+├── logs
+├── middleware
+│   └── analytics.js
+├── migrations
+│   ├── 1764347219024_create-urls-table.js
+│   └── 1764424203461_increase-short-code-length.js
+├── or
+├── package-lock.json
+├── package.json
+├── payload.json
+├── post-script.lua
+├── project_structure.txt
+├── README.md
+├── redis-data
+│   ├── appendonlydir
+│   │   ├── appendonly.aof.1.base.rdb
+│   │   ├── appendonly.aof.1.incr.aof
+│   │   └── appendonly.aof.manifest
+│   └── dump.rdb
+├── redis.conf
+├── src
+│   ├── config
+│   │   ├── database.js
+│   │   └── redis.js
+│   ├── controllers
+│   │   ├── analyticsController.js
+│   │   └── urlController.js
+│   ├── cron
+│   │   └── cleanupExpired.js
+│   ├── middleware
+│   │   ├── analytics.js
+│   │   ├── cors.js
+│   │   ├── httpsRedirect.js
+│   │   ├── rateLimit.js
+│   │   ├── rateLimiter.js
+│   │   ├── redisRateLimit.js
+│   │   └── security.js
+│   ├── models
+│   │   ├── clickModel.js
+│   │   └── urlModel.js
+│   ├── routes
+│   │   ├── analyticsRoutes.js
+│   │   └── urlRoutes.js
+│   ├── server.js
+│   ├── services
+│   │   ├── analyticsService.js
+│   │   ├── bulkService.js
+│   │   └── urlService.js
+│   └── utils
+│       ├── base62.js
+│       ├── geo.js
+│       ├── qr.js
+│       ├── ua.js
+│       └── urlValidation.js
+├── TEST_RESULTS_DAY14.txt
+├── test-base62.js
+├── test.sh
+├── tests
+│   ├── base62.test.js
+│   ├── helpers
+│   │   └── testUtils.js
+│   ├── integration
+│   │   ├── analytics.test.js
+│   │   ├── cache.test.js
+│   │   ├── caching.test.js
+│   │   ├── rateLimit.test.js
+│   │   ├── redirect.test.js
+│   │   ├── security.test.js
+│   │   └── shorten.test.js
+│   ├── rateLimiter.test.js
+│   ├── setup.js
+│   ├── shortCode.test.js
+│   └── urlValidation.test.js
+├── url-shortener-frontend
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.cjs
+│   ├── postcss.config.js
+│   ├── public
+│   │   └── vite.svg
+│   ├── README.md
+│   ├── src
+│   │   ├── AnalyticsPage.jsx
+│   │   ├── App.css
+│   │   ├── App.jsx
+│   │   ├── assets
+│   │   ├── index.css
+│   │   ├── main.jsx
+│   │   └── NotFoundPage.jsx
+│   ├── tailwind.config.js
+│   └── vite.config.js
+├── use
+├── views
+│   └── dashboard.ejs
+└── vim
+    └── nano
+
+25 directories, 88 files

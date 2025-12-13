@@ -277,7 +277,9 @@ import {
   Legend,
 } from 'recharts';
 
-const API_BASE = 'http://localhost:3000';
+// const API_BASE = 'http://localhost:3000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-production-9379.up.railway.app';
+
 
 export default function AnalyticsPage() {
   const { code } = useParams();
