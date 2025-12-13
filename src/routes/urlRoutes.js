@@ -11,9 +11,9 @@
 
 
 
-
 import express from 'express';
 import urlController from '../controllers/urlController.js';
+import analyticsMiddleware from '../middleware/analytics.js';
 
 const router = express.Router();
 
@@ -24,7 +24,7 @@ router.post('/api/shorten', urlController.shortenUrl.bind(urlController));
 router.get('/api/stats/:shortCode', urlController.getStats.bind(urlController));
 
 // Redirect to original URL
-router.get('/:shortCode', urlController.redirectUrl.bind(urlController));
+router.get('/:shortCode', analyticsMiddleware, urlController.redirectUrl.bind(urlController));
 
 // ✅ QR code endpoint
 router.get('/api/qr/:shortCode', urlController.getQr.bind(urlController));
