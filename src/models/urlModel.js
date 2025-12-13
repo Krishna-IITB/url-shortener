@@ -366,7 +366,7 @@ class UrlModel {
           c.clicked_at,
           c.country,
           c.device_type,
-          c.referrer
+          c.referer
         FROM urls u
         LEFT JOIN clicks c ON u.short_code = c.short_code
         WHERE u.short_code = $1
@@ -442,24 +442,24 @@ class UrlModel {
           ),
           '[]'::json
         ) AS device_breakdown,
-        -- top referrers
+        -- top referers
         COALESCE(
           (
             SELECT json_agg(
-              json_build_object('referrer', referrer, 'count', cnt)
+              json_build_object('referer', referer, 'count', cnt)
               ORDER BY cnt DESC
             )
             FROM (
-              SELECT referrer, COUNT(*) AS cnt
+              SELECT referer, COUNT(*) AS cnt
               FROM base
-              WHERE referrer IS NOT NULL AND referrer <> ''
-              GROUP BY referrer
+              WHERE referer IS NOT NULL AND referer <> ''
+              GROUP BY referer
               ORDER BY cnt DESC
               LIMIT 5
             ) r
           ),
           '[]'::json
-        ) AS top_referrers
+        ) AS top_referers
       FROM base;
     `;
     const result = await pool.query(query, [shortCode]);
