@@ -63,7 +63,8 @@
 
 
 import axios from 'axios';
-import UAParser from 'ua-parser-js';
+import { UAParser } from 'ua-parser-js';
+
 import pool from '../config/database.js';
 
 async function lookupGeo(ip) {
