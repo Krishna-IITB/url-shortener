@@ -118,7 +118,6 @@
 
 
 
-
 // src/server.js
 import * as Sentry from '@sentry/node';
 import express from 'express';
@@ -174,10 +173,15 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 5. API routes (JSON API)
+// 5. Test Sentry endpoint (under /api to avoid conflict with /:shortCode)
+app.get('/api/debug-sentry', function mainHandler(req) {
+  throw new Error('My first Sentry error!');
+});
+
+// 6. API routes (JSON API)
 app.use('/api', urlRoutes);
 
-// 6. Root landing route (for browser / simple check)
+// 7. Root landing route (for browser / simple check)
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -188,12 +192,8 @@ app.get('/', (req, res) => {
   });
 });
 
-// 7. Test Sentry (temporary - delete after verifying it works)
-app.get('/debug-sentry', function mainHandler(req) {
-  throw new Error('My first Sentry error!');
-});
-
 // 8. Redirect routes (shortCode handling like "/abc123")
+// This catches all remaining GET routes, so must come after specific routes
 app.use('/', urlRoutes);
 
 // 9. Sentry error handler (MUST come before 404/error handlers)
