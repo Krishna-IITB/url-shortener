@@ -418,9 +418,10 @@ class UrlService {
         count: Number(item.count || 0),
       })),
       device_breakdown: deviceBreakdown.map(item => ({
-        device_type: item.device_type,
-        count: Number(item.count || 0),
-      })),
+  os_name: item.os_name,
+  device_model: item.device_model,
+  count: Number(item.count || 0),
+})),
       top_referers: topReferrers.map(item => ({
         referer: item.referer,
         count: Number(item.count || 0),
