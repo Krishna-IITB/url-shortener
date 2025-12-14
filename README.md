@@ -295,6 +295,6 @@ Scripts like `load-test.sh`, `load-script.lua`, and `LOAD_TEST_RESULTS.md` show 
 
 Place your own screenshots here (already referenced at the top):
 
-- `assets/hero-dashboard.png` – landing page with gradient hero + form.
-- `assets/analytics-dashboard.png` – analytics page showing clicks, devices, countries, referrers, browsers.
+- `<img width="1439" height="858" alt="hero-dashboard" src="https://github.com/user-attachments/assets/2a7f26e1-e2d7-451f-86c3-970e64adf0ef" />` – landing page with gradient hero + form.
+- `<img width="1435" height="855" alt="analytics-dashboard" src="https://github.com/user-attachments/assets/79af98ed-6833-42bd-90cd-ba3b552ff66a" />` – analytics page showing clicks, devices, countries, referrers, browsers.
 
