@@ -312,9 +312,9 @@ Scripts like `load-test.sh`, `load-script.lua`, and `LOAD_TEST_RESULTS.md` show 
 - Team / workspace support.
 
 ---
-
 ## 📸 Screenshots
 
--![Landing](assets/hero-dashboard.png) – landing page with gradient hero + form.
-- ![Analytics](assets/analytics-dashboard.png) – analytics page showing clicks, devices, countries, referrers, browsers.
+![Landing](assets/hero-dashboard.png)   <!-- landing page with gradient hero + form -->
+![Analytics](assets/analytics-dashboard.png)   <!-- analytics: clicks, devices, countries, referrers, browsers -->
+
 
