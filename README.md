@@ -48,20 +48,26 @@ GET /health # health endpoint
 
 ---
 
+Put this whole block in your README so it keeps the tree format and order:
+
+```md
 ## 🧬 Architecture
 
+```
 Client (React)
 │
-├── POST /api/shorten # create short URL
-├── GET /api/stats/:code # analytics
-├── GET /api/stats/:code/browsers
-├── GET /api/qr/:code # QR image data URL
-└── GET /:code # redirect with analytics
+├── POST /api/shorten            # create short URL
+├── GET  /api/stats/:code        # analytics
+├── GET  /api/stats/:code/browsers
+├── GET  /api/qr/:code           # QR image data URL
+└── GET  /:code                  # redirect with analytics
 
 Backend (Express)
 │
-├── PostgreSQL (urls, clicks tables)
-└── Redis (url cache, click de‑dup keys)
+├── PostgreSQL  (urls, clicks tables)
+└── Redis       (url cache, click de‑dup keys)
+```
+```
 
 
 - `urls`  
@@ -292,8 +298,6 @@ Scripts like `load-test.sh`, `load-script.lua`, and `LOAD_TEST_RESULTS.md` show 
 ---
 
 ## 📸 Screenshots
-
-Place your own screenshots here (already referenced at the top):
 
 -![Landing](assets/hero-dashboard.png) – landing page with gradient hero + form.
 - ![Analytics](assets/analytics-dashboard.png) – analytics page showing clicks, devices, countries, referrers, browsers.
