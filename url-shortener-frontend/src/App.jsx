@@ -227,8 +227,6 @@
 
 
 
-
-
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -297,41 +295,48 @@ export default function App() {
       {/* animated gradient blobs */}
       <div className="bg-orbit" />
 
-      <div className="mx-auto max-w-6xl xl:max-w-7xl px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 py-10 lg:py-16">
         {/* top bar */}
-        <header className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-2xl bg-gradient-to-tr from-indigo-500 to-sky-400 shadow-lg shadow-indigo-500/40 animate-pulse-soft" />
-            <span className="text-sm font-semibold tracking-[0.2em] text-slate-400 uppercase">
-              Quantum Links
-            </span>
+        <header className="mb-10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-3xl bg-gradient-to-tr from-indigo-500 to-sky-400 shadow-lg shadow-indigo-500/40 animate-pulse-soft" />
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold tracking-[0.22em] text-slate-400 uppercase">
+                Quantum Links
+              </span>
+              <span className="text-[11px] text-slate-500">
+                Smart URLs. Live analytics.
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setDark((d) => !d)}
-              className="text-xs px-2 py-1 rounded-full border border-slate-700/70 bg-slate-900/70 hover:bg-slate-800/80 backdrop-blur-sm transition"
+              className="text-xs px-3 py-1.5 rounded-full border border-slate-700/70 bg-slate-900/80 hover:bg-slate-800/90 backdrop-blur-sm transition"
             >
               {dark ? 'Light mode' : 'Dark mode'}
             </button>
-            <Link
-              to={shortData?.short_code ? `/analytics/${shortData.short_code}` : '/'}
-              className="hidden sm:inline-flex items-center gap-1 text-xs text-slate-300 hover:text-indigo-400 transition"
-            >
-              <span>View last analytics</span>
-              <span>↗</span>
-            </Link>
+            {shortData?.short_code && (
+              <Link
+                to={`/analytics/${shortData.short_code}`}
+                className="hidden sm:inline-flex items-center gap-1 text-xs text-slate-300 hover:text-indigo-400 transition"
+              >
+                <span>View last analytics</span>
+                <span>↗</span>
+              </Link>
+            )}
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start lg:items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start lg:items-stretch">
           {/* Left: hero + form */}
-          <div className="lg:col-span-6 space-y-8 animate-fade-up">
+          <div className="lg:col-span-6 space-y-9 animate-fade-up">
             <div className="space-y-4">
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-300 shadow-sm shadow-emerald-500/30">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Realtime link intelligence
               </p>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight">
                 Turn long URLs into
                 <span className="bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-300 bg-clip-text text-transparent">
                   {' '}
@@ -428,23 +433,23 @@ export default function App() {
 
           {/* Right: animated hero panel */}
           <div className="lg:col-span-6">
-            <div className="relative h-64 sm:h-72 md:h-80 lg:h-full rounded-3xl border border-slate-800/80 bg-slate-900/40 backdrop-blur-3xl overflow-hidden shadow-[0_0_80px_rgba(15,23,42,0.9)] animate-float-slow">
+            <div className="relative h-[320px] sm:h-[360px] md:h-[420px] lg:h-[480px] rounded-[32px] border border-slate-800/80 bg-slate-900/40 backdrop-blur-3xl overflow-hidden shadow-[0_0_120px_rgba(15,23,42,1)] animate-float-slow">
               {/* gradient glow */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-sky-500/15 to-emerald-500/25 opacity-80" />
               {/* orbiting dots */}
               <div className="absolute inset-0">
                 <div className="absolute top-10 left-8 h-2 w-2 rounded-full bg-sky-400 shadow-sky-400/60 shadow-lg animate-pulse" />
                 <div className="absolute bottom-10 right-10 h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-emerald-400/60 shadow-lg animate-pulse-soft" />
-                <div className="absolute top-1/2 left-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-indigo-400/40" />
-                <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-sky-400/20" />
+                <div className="absolute top-1/2 left-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full border border-indigo-400/40" />
+                <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full border border-sky-400/20" />
               </div>
 
-              <div className="relative h-full flex items-center justify-center px-6 py-8 text-center">
+              <div className="relative h-full flex items-center justify-center px-8 py-10 text-center">
                 <div className="max-w-md space-y-4">
                   <p className="text-[11px] uppercase tracking-[0.25em] text-slate-300">
                     Live click telemetry
                   </p>
-                  <p className="text-lg sm:text-xl font-semibold">
+                  <p className="text-lg sm:text-xl lg:text-2xl font-semibold">
                     Watch your links light up from
                     <span className="text-indigo-200"> devices</span>,{' '}
                     <span className="text-sky-200">countries</span>, and{' '}
