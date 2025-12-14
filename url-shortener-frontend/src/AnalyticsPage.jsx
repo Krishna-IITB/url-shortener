@@ -44,13 +44,15 @@
 
 //         setStats(statsRes.data.data);
 
-//         const normalizedBrowsers = (browsersRes.data.data || []).map((row) => ({
-//           browser:
-//             row.browser === 'WebKit'
-//               ? 'Safari / WebKit'
-//               : row.browser || 'Unknown',
-//           count: Number(row.count || 0),
-//         }));
+//         const normalizedBrowsers = (browsersRes.data.data || []).map(
+//           (row) => ({
+//             browser:
+//               row.browser === 'WebKit'
+//                 ? 'Safari / WebKit'
+//                 : row.browser || 'Unknown',
+//             count: Number(row.count || 0),
+//           }),
+//         );
 //         setBrowserStats(normalizedBrowsers);
 //       } catch (err) {
 //         const msg = err.response?.data?.error || 'Failed to load stats';
@@ -124,7 +126,7 @@
 //     value: c.count,
 //   }));
 
-//   // SHORT LABELS for chart, FULL LABELS in list
+//   // short labels on axis, full labels in list
 //   const deviceData = (device_breakdown || []).map((d) => {
 //     const rawLabel = d.device_type || 'Unknown';
 //     const shortLabel = rawLabel
@@ -151,7 +153,7 @@
 
 //   const totalBrowserCount = browserStats.reduce(
 //     (sum, b) => sum + b.count,
-//     0
+//     0,
 //   );
 //   const maxBrowserCount =
 //     browserStats.length > 0
@@ -163,38 +165,38 @@
 //       <div className="bg-orbit absolute inset-0" />
 //       <ParticleSystem />
 
-//       <div className="relative z-10 mx-auto max-w-7xl px-4 lg:px-10 py-12 space-y-12">
+//       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 py-6 sm:py-10 lg:py-12 space-y-8 sm:space-y-10 lg:space-y-12">
 //         {/* HEADER */}
 //         <motion.div
 //           initial={{ opacity: 0, y: 50 }}
 //           animate={{ opacity: 1, y: 0 }}
-//           className="flex items-center justify-between"
+//           className="flex flex-col sm:flex-row gap-4 sm:gap-0 items-start sm:items-center justify-between"
 //         >
 //           <div className="space-y-2">
 //             <motion.p
-//               className="text-sm uppercase tracking-[0.3em] text-purple-300 flex items-center gap-2"
+//               className="text-xs sm:text-sm uppercase tracking-[0.3em] text-purple-300 flex items-center gap-2"
 //               animate={{ scale: [1, 1.05, 1] }}
 //               transition={{ duration: 2, repeat: Infinity }}
 //             >
-//               <Sparkles className="w-4 h-4 animate-pulse" />
+//               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse" />
 //               Analytics Dashboard
 //             </motion.p>
-//             <h1 className="text-5xl lg:text-6xl font-black bg-gradient-to-r from-indigo-400 via-white to-emerald-400 bg-clip-text text-transparent">
+//             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-indigo-400 via-white to-emerald-400 bg-clip-text text-transparent">
 //               {code?.toUpperCase()}
 //             </h1>
 //           </div>
 //           <Link
 //             to="/"
-//             className="group flex items-center gap-2 px-6 py-3 rounded-3xl glass-card hover:bg-slate-800/50 border border-purple-500/30 text-lg font-semibold transition-all hover:shadow-purple-500/50"
+//             className="group flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-3xl glass-card hover:bg-slate-800/50 border border-purple-500/30 text-sm sm:text-lg font-semibold transition-all hover:shadow-purple-500/50 self-stretch sm:self-auto"
 //           >
-//             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+//             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
 //             Back
 //           </Link>
 //         </motion.div>
 
 //         {/* STAT CARDS */}
 //         <motion.div
-//           className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+//           className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6"
 //           initial={{ opacity: 0 }}
 //           animate={{ opacity: 1 }}
 //           transition={{ staggerChildren: 0.1 }}
@@ -218,19 +220,19 @@
 //           ].map((stat, i) => (
 //             <motion.div
 //               key={i}
-//               initial={{ y: 50, opacity: 0 }}
+//               initial={{ y: 40, opacity: 0 }}
 //               animate={{ y: 0, opacity: 1 }}
-//               whileHover={{ y: -10, scale: 1.05 }}
-//               className={`glass-card rounded-3xl p-8 text-center shadow-2xl ${stat.color} bg-gradient-to-br`}
+//               whileHover={{ y: -8, scale: 1.04 }}
+//               className={`glass-card rounded-3xl p-5 sm:p-6 lg:p-8 text-center shadow-2xl ${stat.color} bg-gradient-to-br`}
 //             >
 //               <motion.div
-//                 className="text-5xl lg:text-6xl font-black bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent mb-3"
+//                 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent mb-2 sm:mb-3"
 //                 animate={{ scale: [1, 1.1, 1] }}
 //                 transition={{ duration: 2, repeat: Infinity }}
 //               >
 //                 {stat.value}
 //               </motion.div>
-//               <p className="text-slate-400 text-sm uppercase tracking-wider font-semibold">
+//               <p className="text-slate-400 text-xs sm:text-sm uppercase tracking-wider font-semibold">
 //                 {stat.label}
 //               </p>
 //             </motion.div>
@@ -238,21 +240,21 @@
 //         </motion.div>
 
 //         {/* LINE + DEVICE CHARTS */}
-//         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+//         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 //           <motion.div
 //             initial={{ opacity: 0, x: -50 }}
 //             animate={{ opacity: 1, x: 0 }}
-//             className="lg:col-span-8 glass-card rounded-3xl p-8 shadow-2xl col-span-1"
+//             className="lg:col-span-8 glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl col-span-1"
 //           >
 //             <motion.p
-//               className="mb-8 text-xl font-bold text-slate-200 flex items-center gap-3"
+//               className="mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-lg font-bold text-slate-200 flex items-center gap-3"
 //               animate={{ scale: [1, 1.02, 1] }}
 //               transition={{ duration: 2, repeat: Infinity }}
 //             >
-//               <div className="w-4 h-4 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 shadow-lg animate-pulse" />
+//               <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 shadow-lg animate-pulse" />
 //               Clicks Over Time (Last 7 Days)
 //             </motion.p>
-//             <div className="h-96">
+//             <div className="h-[220px] sm:h-[260px] md:h-[320px] lg:h-[380px]">
 //               <ResponsiveContainer width="100%" height="100%">
 //                 <LineChart data={timelineData}>
 //                   <defs>
@@ -275,14 +277,24 @@
 //                       />
 //                     </linearGradient>
 //                   </defs>
-//                   <XAxis dataKey="date" stroke="#9ca3af" fontSize={13} />
-//                   <YAxis allowDecimals={false} stroke="#9ca3af" />
+//                   <XAxis
+//                     dataKey="date"
+//                     stroke="#9ca3af"
+//                     fontSize={11}
+//                     tickMargin={8}
+//                   />
+//                   <YAxis
+//                     allowDecimals={false}
+//                     stroke="#9ca3af"
+//                     width={32}
+//                     tickMargin={4}
+//                   />
 //                   <Tooltip />
 //                   <Line
 //                     type="monotone"
 //                     dataKey="clicks"
 //                     stroke="url(#lineGradient)"
-//                     strokeWidth={5}
+//                     strokeWidth={4}
 //                     dot={false}
 //                   />
 //                 </LineChart>
@@ -290,18 +302,17 @@
 //             </div>
 //           </motion.div>
 
-//         {/* DEVICE TYPES – FIXED LAYOUT */}
+//           {/* DEVICE TYPES */}
 //           <motion.div
 //             initial={{ opacity: 0, x: 50 }}
 //             animate={{ opacity: 1, x: 0 }}
-//             className="lg:col-span-4 glass-card rounded-3xl p-8 shadow-2xl"
+//             className="lg:col-span-4 glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl"
 //           >
-//             <p className="mb-6 text-xl font-bold text-slate-200 flex items-center gap-3">
-//               <div className="w-4 h-4 rounded-full bg-emerald-400 shadow-lg animate-pulse" />
+//             <p className="mb-4 sm:mb-6 text-sm sm:text-xl font-bold text-slate-200 flex items-center gap-3">
+//               <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-emerald-400 shadow-lg animate-pulse" />
 //               Device Types
 //             </p>
-
-//             <div className="h-64 mb-6">
+//             <div className="h-[200px] sm:h-[230px] md:h-[260px] lg:h-[280px] mb-4 sm:mb-6">
 //               <ResponsiveContainer width="100%" height="100%">
 //                 <BarChart
 //                   data={deviceData}
@@ -314,9 +325,13 @@
 //                     height={40}
 //                     interval="preserveStartEnd"
 //                     minTickGap={10}
-//                     tick={{ fontSize: 11, fill: '#9ca3af' }}
+//                     tick={{ fontSize: 10, fill: '#9ca3af' }}
 //                   />
-//                   <YAxis allowDecimals={false} stroke="#9ca3af" />
+//                   <YAxis
+//                     allowDecimals={false}
+//                     stroke="#9ca3af"
+//                     width={30}
+//                   />
 //                   <Tooltip
 //                     formatter={(value, _name, entry) => [
 //                       value,
@@ -332,14 +347,14 @@
 //               </ResponsiveContainer>
 //             </div>
 
-//             <ul className="space-y-2 text-sm">
+//             <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
 //               {deviceData.map((d) => (
 //                 <li
 //                   key={d.rawLabel}
 //                   className="flex justify-between items-center text-slate-300 py-1.5 px-2 rounded-lg hover:bg-slate-900/60 transition-all"
 //                 >
 //                   <span className="font-medium">{d.rawLabel}</span>
-//                   <span className="font-black text-xl text-emerald-400">
+//                   <span className="font-black text-base sm:text-xl text-emerald-400">
 //                     {d.count}
 //                   </span>
 //                 </li>
@@ -350,16 +365,16 @@
 
 //         {/* COUNTRIES + REFERRERS */}
 //         <motion.div
-//           className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+//           className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8"
 //           initial={{ opacity: 0 }}
 //           animate={{ opacity: 1 }}
 //         >
-//           <motion.div className="glass-card rounded-3xl p-8 shadow-2xl">
-//             <p className="mb-8 text-xl font-bold text-slate-200 flex items-center gap-3">
-//               <div className="w-4 h-4 rounded-full bg-sky-400 shadow-lg animate-pulse" />
+//           <motion.div className="glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl">
+//             <p className="mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-xl font-bold text-slate-200 flex items-center gap-3">
+//               <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-sky-400 shadow-lg animate-pulse" />
 //               Top Countries
 //             </p>
-//             <div className="h-96">
+//             <div className="h-[240px] sm:h-[280px] md:h-[320px] lg:h-[380px]">
 //               <ResponsiveContainer width="100%" height="100%">
 //                 <PieChart>
 //                   <Pie
@@ -368,7 +383,7 @@
 //                     nameKey="name"
 //                     cx="55%"
 //                     cy="50%"
-//                     outerRadius={110}
+//                     outerRadius={100}
 //                     label={({ name, percent }) =>
 //                       `${name} ${(percent * 100).toFixed(0)}%`
 //                     }
@@ -386,17 +401,21 @@
 //             </div>
 //           </motion.div>
 
-//           <motion.div className="glass-card rounded-3xl p-8 shadow-2xl overflow-hidden">
-//             <p className="mb-8 text-xl font-bold text-slate-200 flex items-center gap-3">
-//               <div className="w-4 h-4 rounded-full bg-purple-400 shadow-lg animate-pulse" />
+//           <motion.div className="glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl overflow-hidden">
+//             <p className="mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-xl font-bold text-slate-200 flex items-center gap-3">
+//               <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-purple-400 shadow-lg animate-pulse" />
 //               Top Referrers
 //             </p>
-//             <div className="max-h-96 overflow-y-auto">
-//               <table className="w-full text-sm">
+//             <div className="max-h-72 sm:max-h-80 overflow-y-auto">
+//               <table className="w-full text-xs sm:text-sm">
 //                 <thead>
 //                   <tr className="border-b border-slate-800/50 text-slate-400 sticky top-0 bg-slate-950/50 backdrop-blur-sm">
-//                     <th className="py-4 pr-6 text-left font-bold">Referrer</th>
-//                     <th className="py-4 text-right font-bold">Clicks</th>
+//                     <th className="py-3 sm:py-4 pr-4 sm:pr-6 text-left font-bold">
+//                       Referrer
+//                     </th>
+//                     <th className="py-3 sm:py-4 text-right font-bold">
+//                       Clicks
+//                     </th>
 //                   </tr>
 //                 </thead>
 //                 <tbody>
@@ -408,10 +427,10 @@
 //                       transition={{ delay: i * 0.05 }}
 //                       className="border-b border-slate-900/50 hover:bg-slate-900/30 transition-all duration-200"
 //                     >
-//                       <td className="py-4 pr-6 max-w-xs truncate font-medium text-slate-200">
+//                       <td className="py-3 sm:py-4 pr-4 sm:pr-6 max-w-[10rem] sm:max-w-xs truncate font-medium text-slate-200">
 //                         {r.referrer || 'Direct / None'}
 //                       </td>
-//                       <td className="py-4 text-right font-black text-2xl text-purple-400">
+//                       <td className="py-3 sm:py-4 text-right font-black text-lg sm:text-2xl text-purple-400">
 //                         {r.count}
 //                       </td>
 //                     </motion.tr>
@@ -422,25 +441,25 @@
 //           </motion.div>
 //         </motion.div>
 
-//         {/* BROWSERS – NEW ANIMATED PANEL */}
+//         {/* BROWSERS */}
 //         <motion.div
-//           className="glass-card rounded-3xl p-8 shadow-2xl mt-4"
-//           initial={{ opacity: 0, y: 40 }}
+//           className="glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl mt-2 sm:mt-4"
+//           initial={{ opacity: 0, y: 30 }}
 //           animate={{ opacity: 1, y: 0 }}
 //         >
-//           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+//           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
 //             <motion.div
 //               className="flex items-center gap-3"
 //               animate={{ scale: [1, 1.03, 1] }}
 //               transition={{ duration: 2, repeat: Infinity }}
 //             >
 //               <div className="w-3 h-3 rounded-full bg-gradient-to-r from-indigo-400 to-sky-400 shadow-lg animate-pulse" />
-//               <h2 className="text-xl font-bold text-slate-100">
+//               <h2 className="text-sm sm:text-xl font-bold text-slate-100">
 //                 Browser Insights
 //               </h2>
 //             </motion.div>
 //             {totalBrowserCount > 0 && (
-//               <p className="text-xs text-slate-400">
+//               <p className="text-[11px] sm:text-xs text-slate-400">
 //                 Total browser hits:{' '}
 //                 <span className="font-semibold text-slate-100">
 //                   {totalBrowserCount}
@@ -450,12 +469,14 @@
 //           </div>
 
 //           {loadingBrowsers ? (
-//             <div className="flex items-center gap-3 text-sm text-slate-400">
+//             <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-400">
 //               <div className="w-4 h-4 border-2 border-slate-500/40 border-t-slate-100 rounded-full animate-spin" />
 //               Loading browser stats…
 //             </div>
 //           ) : browserStats.length === 0 ? (
-//             <p className="text-sm text-slate-400">No browser data yet.</p>
+//             <p className="text-xs sm:text-sm text-slate-400">
+//               No browser data yet.
+//             </p>
 //           ) : (
 //             <div className="space-y-3">
 //               {browserStats.map((row, idx) => {
@@ -470,19 +491,19 @@
 //                     initial={{ opacity: 0, x: 30 }}
 //                     animate={{ opacity: 1, x: 0 }}
 //                     transition={{ delay: idx * 0.05 }}
-//                     className="group flex items-center gap-3 text-sm text-slate-200"
+//                     className="group flex items-center gap-3 text-xs sm:text-sm text-slate-200"
 //                   >
-//                     <div className="w-40 truncate font-medium">
+//                     <div className="w-32 sm:w-40 truncate font-medium">
 //                       {row.browser}
 //                     </div>
 
-//                     <div className="flex-1 h-2.5 rounded-full bg-slate-900/80 overflow-hidden relative">
+//                     <div className="flex-1 h-2 sm:h-2.5 rounded-full bg-slate-900/80 overflow-hidden relative">
 //                       <motion.div
 //                         initial={{ width: 0 }}
 //                         animate={{
 //                           width: `${Math.min(
 //                             100,
-//                             (row.count / maxBrowserCount) * 100
+//                             (row.count / maxBrowserCount) * 100,
 //                           ).toFixed(1)}%`,
 //                         }}
 //                         transition={{ duration: 0.6, delay: idx * 0.05 }}
@@ -490,11 +511,11 @@
 //                       />
 //                     </div>
 
-//                     <div className="w-16 text-right">
-//                       <p className="text-xs text-slate-400">
+//                     <div className="w-14 sm:w-16 text-right">
+//                       <p className="text-[10px] sm:text-xs text-slate-400">
 //                         {percentage.toFixed(1)}%
 //                       </p>
-//                       <p className="text-sm font-semibold text-slate-100">
+//                       <p className="text-xs sm:text-sm font-semibold text-slate-100">
 //                         {row.count}
 //                       </p>
 //                     </div>
@@ -536,6 +557,7 @@
 //     </>
 //   );
 // }
+
 
 
 
@@ -679,7 +701,6 @@ export default function AnalyticsPage() {
     value: c.count,
   }));
 
-  // short labels on axis, full labels in list
   const deviceData = (device_breakdown || []).map((d) => {
     const rawLabel = d.device_type || 'Unknown';
     const shortLabel = rawLabel
@@ -718,10 +739,10 @@ export default function AnalyticsPage() {
       <div className="bg-orbit absolute inset-0" />
       <ParticleSystem />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 py-6 sm:py-10 lg:py-12 space-y-8 sm:space-y-10 lg:space-y-12">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 py-6 sm:py-10 lg:py-12 space-y-6 sm:space-y-8">
         {/* HEADER */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col sm:flex-row gap-4 sm:gap-0 items-start sm:items-center justify-between"
         >
@@ -734,150 +755,150 @@ export default function AnalyticsPage() {
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse" />
               Analytics Dashboard
             </motion.p>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-indigo-400 via-white to-emerald-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-indigo-400 via-white to-emerald-400 bg-clip-text text-transparent">
               {code?.toUpperCase()}
             </h1>
           </div>
           <Link
             to="/"
-            className="group flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-3xl glass-card hover:bg-slate-800/50 border border-purple-500/30 text-sm sm:text-lg font-semibold transition-all hover:shadow-purple-500/50 self-stretch sm:self-auto"
+            className="group flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-3xl glass-card hover:bg-slate-800/50 border border-purple-500/30 text-sm sm:text-base font-semibold transition-all hover:shadow-purple-500/50 self-stretch sm:self-auto"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
             Back
           </Link>
         </motion.div>
 
-        {/* STAT CARDS */}
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ staggerChildren: 0.1 }}
-        >
-          {[
-            {
-              label: 'Total Clicks',
-              value: total_clicks.toLocaleString(),
-              color: 'from-indigo-500',
-            },
-            {
-              label: 'Unique IPs',
-              value: unique_ips.toLocaleString(),
-              color: 'from-emerald-500',
-            },
-            {
-              label: 'Click Rate',
-              value: `${clickRate}x`,
-              color: 'from-purple-500',
-            },
-          ].map((stat, i) => (
+        {/* ROW 1: STATS + TIMELINE + DEVICES */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          {/* Stats + timeline stacked */}
+          <div className="xl:col-span-8 space-y-6">
+            {/* STAT CARDS */}
             <motion.div
-              key={i}
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              whileHover={{ y: -8, scale: 1.04 }}
-              className={`glass-card rounded-3xl p-5 sm:p-6 lg:p-8 text-center shadow-2xl ${stat.color} bg-gradient-to-br`}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ staggerChildren: 0.08 }}
             >
-              <motion.div
-                className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent mb-2 sm:mb-3"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                {stat.value}
-              </motion.div>
-              <p className="text-slate-400 text-xs sm:text-sm uppercase tracking-wider font-semibold">
-                {stat.label}
-              </p>
+              {[
+                {
+                  label: 'Total Clicks',
+                  value: total_clicks.toLocaleString(),
+                  color: 'from-indigo-500',
+                },
+                {
+                  label: 'Unique IPs',
+                  value: unique_ips.toLocaleString(),
+                  color: 'from-emerald-500',
+                },
+                {
+                  label: 'Click Rate',
+                  value: `${clickRate}x`,
+                  color: 'from-purple-500',
+                },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ y: 30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  whileHover={{ y: -6, scale: 1.03 }}
+                  className={`glass-card rounded-2xl p-4 sm:p-5 text-center shadow-xl ${stat.color} bg-gradient-to-br`}
+                >
+                  <motion.div
+                    className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent mb-1.5 sm:mb-2"
+                    animate={{ scale: [1, 1.06, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    {stat.value}
+                  </motion.div>
+                  <p className="text-slate-400 text-[11px] sm:text-xs uppercase tracking-wide font-semibold">
+                    {stat.label}
+                  </p>
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
-        </motion.div>
 
-        {/* LINE + DEVICE CHARTS */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-8 glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl col-span-1"
-          >
-            <motion.p
-              className="mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-lg font-bold text-slate-200 flex items-center gap-3"
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+            {/* TIMELINE */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="glass-card rounded-2xl p-4 sm:p-5 lg:p-6 shadow-xl"
             >
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 shadow-lg animate-pulse" />
-              Clicks Over Time (Last 7 Days)
-            </motion.p>
-            <div className="h-[220px] sm:h-[260px] md:h-[320px] lg:h-[380px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timelineData}>
-                  <defs>
-                    <linearGradient
-                      id="lineGradient"
-                      x1="0"
-                      y1="0"
-                      x2="1"
-                      y2="1"
-                    >
-                      <stop
-                        offset="0%"
-                        stopColor="#8b5cf6"
-                        stopOpacity={0.9}
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor="#ec4899"
-                        stopOpacity={0.9}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="date"
-                    stroke="#9ca3af"
-                    fontSize={11}
-                    tickMargin={8}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    stroke="#9ca3af"
-                    width={32}
-                    tickMargin={4}
-                  />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="clicks"
-                    stroke="url(#lineGradient)"
-                    strokeWidth={4}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
+              <div className="mb-3 sm:mb-4 flex items-center gap-2 text-xs sm:text-sm text-slate-200 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 shadow-lg animate-pulse" />
+                Clicks over time (last 7 days)
+              </div>
+              <div className="h-[200px] sm:h-[230px] md:h-[260px] lg:h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={timelineData}>
+                    <defs>
+                      <linearGradient
+                        id="lineGradient"
+                        x1="0"
+                        y1="0"
+                        x2="1"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="#8b5cf6"
+                          stopOpacity={0.9}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="#ec4899"
+                          stopOpacity={0.9}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="date"
+                      stroke="#9ca3af"
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      stroke="#9ca3af"
+                      width={32}
+                      tickMargin={4}
+                    />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="clicks"
+                      stroke="url(#lineGradient)"
+                      strokeWidth={3}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </motion.div>
+          </div>
 
-          {/* DEVICE TYPES */}
+          {/* DEVICES CARD */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-4 glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl"
+            className="xl:col-span-4 glass-card rounded-2xl p-4 sm:p-5 lg:p-6 shadow-xl space-y-4"
           >
-            <p className="mb-4 sm:mb-6 text-sm sm:text-xl font-bold text-slate-200 flex items-center gap-3">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-emerald-400 shadow-lg animate-pulse" />
-              Device Types
-            </p>
-            <div className="h-[200px] sm:h-[230px] md:h-[260px] lg:h-[280px] mb-4 sm:mb-6">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-200 mb-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-lg animate-pulse" />
+              Device types
+            </div>
+            <div className="h-[180px] sm:h-[210px] md:h-[230px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={deviceData}
-                  margin={{ top: 10, right: 16, left: 0, bottom: 40 }}
-                  barCategoryGap="30%"
+                  margin={{ top: 10, right: 8, left: 0, bottom: 32 }}
+                  barCategoryGap="35%"
                 >
                   <XAxis
                     dataKey="device"
                     stroke="#9ca3af"
-                    height={40}
+                    height={32}
                     interval="preserveStartEnd"
-                    minTickGap={10}
+                    minTickGap={8}
                     tick={{ fontSize: 10, fill: '#9ca3af' }}
                   />
                   <YAxis
@@ -894,20 +915,19 @@ export default function AnalyticsPage() {
                   <Bar
                     dataKey="count"
                     fill="#22c55e"
-                    radius={[10, 10, 0, 0]}
+                    radius={[8, 8, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
-            <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+            <ul className="space-y-1.5 text-xs sm:text-sm">
               {deviceData.map((d) => (
                 <li
                   key={d.rawLabel}
-                  className="flex justify-between items-center text-slate-300 py-1.5 px-2 rounded-lg hover:bg-slate-900/60 transition-all"
+                  className="flex justify-between items-center text-slate-300 py-1 px-1.5 rounded-md hover:bg-slate-900/60 transition-all"
                 >
-                  <span className="font-medium">{d.rawLabel}</span>
-                  <span className="font-black text-base sm:text-xl text-emerald-400">
+                  <span>{d.rawLabel}</span>
+                  <span className="font-semibold text-emerald-400">
                     {d.count}
                   </span>
                 </li>
@@ -916,32 +936,156 @@ export default function AnalyticsPage() {
           </motion.div>
         </div>
 
-        {/* COUNTRIES + REFERRERS */}
-        <motion.div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <motion.div className="glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl">
-            <p className="mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-xl font-bold text-slate-200 flex items-center gap-3">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-sky-400 shadow-lg animate-pulse" />
-              Top Countries
-            </p>
-            <div className="h-[240px] sm:h-[280px] md:h-[320px] lg:h-[380px]">
+        {/* ROW 2: BROWSERS + REFERRERS + COUNTRIES */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          {/* BROWSERS (wider) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="xl:col-span-5 glass-card rounded-2xl p-4 sm:p-5 lg:p-6 shadow-xl"
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-200">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-400 to-sky-400 shadow-lg animate-pulse" />
+                Browser insights
+              </div>
+              {totalBrowserCount > 0 && (
+                <p className="text-[10px] sm:text-xs text-slate-400">
+                  Total hits:{' '}
+                  <span className="font-semibold text-slate-100">
+                    {totalBrowserCount}
+                  </span>
+                </p>
+              )}
+            </div>
+
+            {loadingBrowsers ? (
+              <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-400">
+                <div className="w-4 h-4 border-2 border-slate-500/40 border-t-slate-100 rounded-full animate-spin" />
+                Loading browser stats…
+              </div>
+            ) : browserStats.length === 0 ? (
+              <p className="text-xs sm:text-sm text-slate-400">
+                No browser data yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {browserStats.map((row, idx) => {
+                  const percentage =
+                    totalBrowserCount > 0
+                      ? (row.count / totalBrowserCount) * 100
+                      : 0;
+
+                  return (
+                    <motion.div
+                      key={row.browser}
+                      initial={{ opacity: 0, x: 24 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="flex items-center gap-3 text-xs sm:text-sm text-slate-200"
+                    >
+                      <div className="w-28 sm:w-32 truncate font-medium">
+                        {row.browser}
+                      </div>
+
+                      <div className="flex-1 h-2 sm:h-2.5 rounded-full bg-slate-900/80 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{
+                            width: `${Math.min(
+                              100,
+                              (row.count / maxBrowserCount) * 100,
+                            ).toFixed(1)}%`,
+                          }}
+                          transition={{ duration: 0.6, delay: idx * 0.05 }}
+                          className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400 shadow-[0_0_12px_rgba(56,189,248,0.5)]"
+                        />
+                      </div>
+
+                      <div className="w-14 text-right">
+                        <p className="text-[10px] text-slate-400">
+                          {percentage.toFixed(1)}%
+                        </p>
+                        <p className="text-xs font-semibold text-slate-100">
+                          {row.count}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
+          </motion.div>
+
+          {/* REFERRERS */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="xl:col-span-4 glass-card rounded-2xl p-4 sm:p-5 lg:p-6 shadow-xl overflow-hidden"
+          >
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-200 mb-3">
+              <span className="w-2 h-2 rounded-full bg-purple-400 shadow-lg animate-pulse" />
+              Top referrers
+            </div>
+            <div className="max-h-60 sm:max-h-64 overflow-y-auto">
+              <table className="w-full text-[11px] sm:text-xs">
+                <thead>
+                  <tr className="border-b border-slate-800/50 text-slate-400 sticky top-0 bg-slate-950/60 backdrop-blur-sm">
+                    <th className="py-2.5 sm:py-3 pr-4 text-left font-semibold">
+                      Referrer
+                    </th>
+                    <th className="py-2.5 sm:py-3 text-right font-semibold">
+                      Clicks
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {referrerData.slice(0, 10).map((r, i) => (
+                    <motion.tr
+                      key={r.referrer || 'direct'}
+                      initial={{ opacity: 0, x: 18 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="border-b border-slate-900/50 hover:bg-slate-900/40 transition-all duration-200"
+                    >
+                      <td className="py-2.5 sm:py-3 pr-4 max-w-[9rem] sm:max-w-xs truncate font-medium text-slate-200">
+                        {r.referrer || 'Direct / None'}
+                      </td>
+                      <td className="py-2.5 sm:py-3 text-right font-bold text-base sm:text-lg text-purple-400">
+                        {r.count}
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+
+          {/* COUNTRIES */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="xl:col-span-3 glass-card rounded-2xl p-4 sm:p-5 lg:p-6 shadow-xl"
+          >
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-200 mb-3">
+              <span className="w-2 h-2 rounded-full bg-sky-400 shadow-lg animate-pulse" />
+              Top countries
+            </div>
+            <div className="h-[180px] sm:h-[210px] md:h-[230px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={countryData.slice(0, 7)}
+                    data={countryData.slice(0, 6)}
                     dataKey="value"
                     nameKey="name"
-                    cx="55%"
+                    cx="50%"
                     cy="50%"
-                    outerRadius={100}
+                    outerRadius={70}
                     label={({ name, percent }) =>
                       `${name} ${(percent * 100).toFixed(0)}%`
                     }
                   >
-                    {countryData.slice(0, 7).map((entry, index) => (
+                    {countryData.slice(0, 6).map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
@@ -953,131 +1097,7 @@ export default function AnalyticsPage() {
               </ResponsiveContainer>
             </div>
           </motion.div>
-
-          <motion.div className="glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl overflow-hidden">
-            <p className="mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-xl font-bold text-slate-200 flex items-center gap-3">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-purple-400 shadow-lg animate-pulse" />
-              Top Referrers
-            </p>
-            <div className="max-h-72 sm:max-h-80 overflow-y-auto">
-              <table className="w-full text-xs sm:text-sm">
-                <thead>
-                  <tr className="border-b border-slate-800/50 text-slate-400 sticky top-0 bg-slate-950/50 backdrop-blur-sm">
-                    <th className="py-3 sm:py-4 pr-4 sm:pr-6 text-left font-bold">
-                      Referrer
-                    </th>
-                    <th className="py-3 sm:py-4 text-right font-bold">
-                      Clicks
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {referrerData.slice(0, 10).map((r, i) => (
-                    <motion.tr
-                      key={r.referrer || 'direct'}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="border-b border-slate-900/50 hover:bg-slate-900/30 transition-all duration-200"
-                    >
-                      <td className="py-3 sm:py-4 pr-4 sm:pr-6 max-w-[10rem] sm:max-w-xs truncate font-medium text-slate-200">
-                        {r.referrer || 'Direct / None'}
-                      </td>
-                      <td className="py-3 sm:py-4 text-right font-black text-lg sm:text-2xl text-purple-400">
-                        {r.count}
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* BROWSERS */}
-        <motion.div
-          className="glass-card rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl mt-2 sm:mt-4"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
-            <motion.div
-              className="flex items-center gap-3"
-              animate={{ scale: [1, 1.03, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-indigo-400 to-sky-400 shadow-lg animate-pulse" />
-              <h2 className="text-sm sm:text-xl font-bold text-slate-100">
-                Browser Insights
-              </h2>
-            </motion.div>
-            {totalBrowserCount > 0 && (
-              <p className="text-[11px] sm:text-xs text-slate-400">
-                Total browser hits:{' '}
-                <span className="font-semibold text-slate-100">
-                  {totalBrowserCount}
-                </span>
-              </p>
-            )}
-          </div>
-
-          {loadingBrowsers ? (
-            <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-400">
-              <div className="w-4 h-4 border-2 border-slate-500/40 border-t-slate-100 rounded-full animate-spin" />
-              Loading browser stats…
-            </div>
-          ) : browserStats.length === 0 ? (
-            <p className="text-xs sm:text-sm text-slate-400">
-              No browser data yet.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {browserStats.map((row, idx) => {
-                const percentage =
-                  totalBrowserCount > 0
-                    ? (row.count / totalBrowserCount) * 100
-                    : 0;
-
-                return (
-                  <motion.div
-                    key={row.browser}
-                    initial={{ opacity: 0, x: 30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="group flex items-center gap-3 text-xs sm:text-sm text-slate-200"
-                  >
-                    <div className="w-32 sm:w-40 truncate font-medium">
-                      {row.browser}
-                    </div>
-
-                    <div className="flex-1 h-2 sm:h-2.5 rounded-full bg-slate-900/80 overflow-hidden relative">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{
-                          width: `${Math.min(
-                            100,
-                            (row.count / maxBrowserCount) * 100,
-                          ).toFixed(1)}%`,
-                        }}
-                        transition={{ duration: 0.6, delay: idx * 0.05 }}
-                        className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400 shadow-[0_0_18px_rgba(56,189,248,0.5)]"
-                      />
-                    </div>
-
-                    <div className="w-14 sm:w-16 text-right">
-                      <p className="text-[10px] sm:text-xs text-slate-400">
-                        {percentage.toFixed(1)}%
-                      </p>
-                      <p className="text-xs sm:text-sm font-semibold text-slate-100">
-                        {row.count}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
@@ -1110,3 +1130,7 @@ function ParticleSystem() {
     </>
   );
 }
+
+
+
+
