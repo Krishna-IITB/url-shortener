@@ -225,8 +225,6 @@
 // }
 
 
-
-
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -295,7 +293,8 @@ export default function App() {
       {/* animated gradient blobs */}
       <div className="bg-orbit" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 py-10 lg:py-16">
+      {/* wider container, more padding */}
+      <div className="mx-auto max-w-[120rem] px-6 lg:px-12 py-10 lg:py-16">
         {/* top bar */}
         <header className="mb-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -328,9 +327,10 @@ export default function App() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start lg:items-stretch">
+        {/* two big columns filling the width */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 xl:gap-16 items-stretch">
           {/* Left: hero + form */}
-          <div className="lg:col-span-6 space-y-9 animate-fade-up">
+          <div className="flex flex-col justify-center space-y-9 animate-fade-up">
             <div className="space-y-4">
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-300 shadow-sm shadow-emerald-500/30">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -431,17 +431,17 @@ export default function App() {
             )}
           </div>
 
-          {/* Right: animated hero panel */}
-          <div className="lg:col-span-6">
-            <div className="relative h-[320px] sm:h-[360px] md:h-[420px] lg:h-[480px] rounded-[32px] border border-slate-800/80 bg-slate-900/40 backdrop-blur-3xl overflow-hidden shadow-[0_0_120px_rgba(15,23,42,1)] animate-float-slow">
+          {/* Right: animated hero panel fills column */}
+          <div className="flex items-center">
+            <div className="relative w-full h-[380px] sm:h-[420px] md:h-[460px] lg:h-[520px] rounded-[32px] border border-slate-800/80 bg-slate-900/40 backdrop-blur-3xl overflow-hidden shadow-[0_0_140px_rgba(15,23,42,1)] animate-float-slow">
               {/* gradient glow */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-sky-500/15 to-emerald-500/25 opacity-80" />
-              {/* orbiting dots */}
+              {/* orbiting dots & circles */}
               <div className="absolute inset-0">
                 <div className="absolute top-10 left-8 h-2 w-2 rounded-full bg-sky-400 shadow-sky-400/60 shadow-lg animate-pulse" />
                 <div className="absolute bottom-10 right-10 h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-emerald-400/60 shadow-lg animate-pulse-soft" />
-                <div className="absolute top-1/2 left-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full border border-indigo-400/40" />
-                <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full border border-sky-400/20" />
+                <div className="absolute top-1/2 left-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full border border-indigo-400/40" />
+                <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full border border-sky-400/20" />
               </div>
 
               <div className="relative h-full flex items-center justify-center px-8 py-10 text-center">
