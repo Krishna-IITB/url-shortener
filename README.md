@@ -48,7 +48,6 @@ GET /health # health endpoint
 
 ---
 
-Put this whole block in your README so it keeps the tree format and order:
 
 ```md
 ## 🧬 Architecture
