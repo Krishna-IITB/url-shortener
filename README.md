@@ -48,40 +48,56 @@ GET /health # health endpoint
 
 ---
 
+## 🚀 Architecture
 
-```md
-Only paste this part, nothing else, and remove any extra backticks you added before/after it:
-
-```md
-## 🧬 Architecture
+Client (React)
 
 ```
-Client (React)
-│
-├── POST /api/shorten            # create short URL
-├── GET  /api/stats/:code        # analytics
-├── GET  /api/stats/:code/browsers
-├── GET  /api/qr/:code           # QR image data URL
-└── GET  /:code                  # redirect with analytics
+├── POST /api/shorten              # create short URL
+├── GET  /api/stats/:code          # analytics
+├── GET  /api/stats/:code/browsers # browser analytics
+├── GET  /api/qr/:code             # QR image data URL
+└── GET  /:code                    # redirect with analytics
+```
 
 Backend (Express)
-│
-├── PostgreSQL  (urls, clicks tables)
-└── Redis       (url cache, click de‑dup keys)
-```
-```
-- `urls`  
-  - `original_url`, `short_code`, `clicks`, `expires_at`, timestamps.
-- `clicks`  
-  - `short_code`, `clicked_at`, `ip_address`, `country`, `city`,  
-    `device_type`, `os_name`, `device_model`, `device_vendor`,  
-    `browser`, `user_agent`, `referer`.
 
-Redirect flow:
+```
+├── PostgreSQL (urls, clicks tables)
+└── Redis (url cache, click de-dup keys)
+```
+
+### Database Schema
+
+* **urls**
+
+  * original_url
+  * short_code
+  * clicks
+  * expires_at
+  * timestamps
+
+* **clicks**
+
+  * short_code
+  * clicked_at
+  * ip_address
+  * country
+  * city
+  * device_type
+  * os_name
+  * device_model
+  * device_vendor
+  * browser
+  * user_agent
+  * referer
+
+### Redirect Flow
 
 1. `GET /:shortCode` hits `analyticsMiddleware`.
-2. Middleware parses IP + User‑Agent, does geo lookup, de‑dups via Redis, and inserts a `clicks` row.
-3. Controller resolves original URL via Redis → Postgres and returns a `301` redirect.
+2. Middleware parses IP + User-Agent, does geo lookup, de-dups via Redis, and inserts a `clicks` row.
+3. Controller resolves original URL via Redis → PostgreSQL and returns a **301 redirect**.
+
 
 ---
 
