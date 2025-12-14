@@ -375,9 +375,14 @@ export default function AnalyticsPage() {
     value: c.count,
   }));
 
+// const deviceData = (device_breakdown || []).map((d) => ({
+//   device: d.device_model || d.os_name || 'Unknown',
+//   count: d.count,
+// }));
+
 const deviceData = (device_breakdown || []).map((d) => ({
-  device: d.device_model || d.os_name || 'Unknown',
-  count: d.count,
+  device: d.device_type || 'Unknown',
+  count: Number(d.count || 0),
 }));
 
 
