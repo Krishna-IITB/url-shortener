@@ -50,6 +50,9 @@ GET /health # health endpoint
 
 
 ```md
+Only paste this part, nothing else, and remove any extra backticks you added before/after it:
+
+```md
 ## 🧬 Architecture
 
 ```
@@ -67,8 +70,6 @@ Backend (Express)
 └── Redis       (url cache, click de‑dup keys)
 ```
 ```
-
-
 - `urls`  
   - `original_url`, `short_code`, `clicks`, `expires_at`, timestamps.
 - `clicks`  
