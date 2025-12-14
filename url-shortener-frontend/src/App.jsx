@@ -1,12 +1,13 @@
-// // App.jsx
+// // src/App.jsx
 // import React, { useState, useEffect } from 'react';
 // import { Link } from 'react-router-dom';
 // import axios from 'axios';
 // import toast from 'react-hot-toast';
 
 // // const API_BASE = 'http://localhost:3000';
-// const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-production-9379.up.railway.app';
-
+// const API_BASE =
+//   import.meta.env.VITE_API_URL ||
+//   'https://url-shortener-production-9379.up.railway.app';
 
 // export default function App() {
 //   const [url, setUrl] = useState('');
@@ -62,89 +63,114 @@
 //   };
 
 //   return (
-//     <div className="min-h-screen w-full flex bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50">
-//       {/* Left panel: landing header + form */}
-//       <div className="w-full max-w-md p-6 bg-slate-100 dark:bg-slate-950 space-y-6">
-//         {/* Landing header */}
-//         <header className="flex flex-col gap-2">
-//           <div className="flex items-center gap-2">
-//             <h1 className="text-2xl font-bold">URL Shortener</h1>
-//             <button
-//               onClick={() => setDark((d) => !d)}
-//               className="ml-auto text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800"
-//             >
-//               {dark ? 'Light mode' : 'Dark mode'}
-//             </button>
-//           </div>
-//           <p className="text-sm text-slate-600 dark:text-slate-400">
-//             Short links with analytics, QR codes, and expiry in seconds.
-//           </p>
-//           <ul className="mt-1 text-xs text-slate-600 dark:text-slate-400 space-y-1 list-disc list-inside">
-//             <li>Custom aliases &amp; link expiry</li>
-//             <li>Real-time click analytics dashboard</li>
-//             <li>QR code for every link</li>
-//           </ul>
-//         </header>
-
-//         {/* Form */}
-//         <form onSubmit={handleSubmit} className="space-y-3">
-//           <input
-//             type="url"
-//             placeholder="https://example.com"
-//             className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-//             value={url}
-//             onChange={(e) => setUrl(e.target.value)}
-//           />
-
-//           <button
-//             type="submit"
-//             disabled={loading}
-//             className="w-full py-2 rounded bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-900 text-sm font-semibold text-white transition"
-//           >
-//             {loading ? 'Shortening...' : 'Shorten URL'}
-//           </button>
-//         </form>
-
-//         {error && (
-//           <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
-//         )}
-
-//         {shortData && (
-//           <div className="mt-4 space-y-3 border-t border-slate-300 dark:border-slate-700 pt-4">
+//     <div className="min-h-screen w-full bg-slate-950 text-slate-50 flex items-center justify-center">
+//       <div className="w-full px-10 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+//         {/* Left: hero + form */}
+//         <div className="lg:col-span-6 space-y-8">
+//           <header className="space-y-3">
 //             <div className="flex items-center gap-2">
-//               <span className="text-sm text-slate-700 dark:text-slate-300">Short URL:</span>
-//               <a
-//                 href={shortData.short_url}
-//                 target="_blank"
-//                 rel="noreferrer"
-//                 className="text-sm text-indigo-600 dark:text-indigo-400 underline break-all"
-//               >
-//                 {shortData.short_url}
-//               </a>
+//               <h1 className="text-3xl font-bold tracking-tight">
+//                 URL Shortener
+//               </h1>
 //               <button
-//                 onClick={handleCopy}
-//                 className="ml-auto px-2 py-1 text-xs rounded bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600"
+//                 onClick={() => setDark((d) => !d)}
+//                 className="ml-auto text-xs px-2 py-1 rounded border border-slate-700 bg-slate-900 hover:bg-slate-800"
 //               >
-//                 {copyLabel}
+//                 {dark ? 'Light mode' : 'Dark mode'}
 //               </button>
 //             </div>
+//             <p className="text-sm text-slate-400 max-w-md">
+//               Create clean, trackable short links with real-time analytics,
+//               device breakdowns, and QR codes in seconds.
+//             </p>
+//             <ul className="mt-1 text-xs text-slate-400 space-y-1 list-disc list-inside">
+//               <li>Custom aliases and link expiry.</li>
+//               <li>Full analytics dashboard for every link.</li>
+//               <li>Instant QR code generation.</li>
+//             </ul>
+//           </header>
 
-//             <Link
-//               to={`/analytics/${shortData.short_code}`}
-//               className="inline-block mt-2 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 underline transition"
+//           <form
+//             onSubmit={handleSubmit}
+//             className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-3"
+//           >
+//             <label className="block text-xs font-medium text-slate-400 mb-1">
+//               Destination URL
+//             </label>
+//             <input
+//               type="url"
+//               placeholder="https://example.com"
+//               className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-900 text-sm text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+//               value={url}
+//               onChange={(e) => setUrl(e.target.value)}
+//             />
+
+//             <button
+//               type="submit"
+//               disabled={loading}
+//               className="w-full py-2 rounded bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-900 text-sm font-semibold text-white transition"
 //             >
-//               📊 View analytics
-//             </Link>
+//               {loading ? 'Shortening...' : 'Shorten URL'}
+//             </button>
 
-//             {shortData.short_code && (
-//               <QrPreview shortCode={shortData.short_code} />
+//             {error && (
+//               <p className="text-sm text-red-400 pt-1">{error}</p>
 //             )}
-//           </div>
-//         )}
-//       </div>
+//           </form>
 
-//       {/* Right panel: decorative, only on md+ */}
-//       <div className="hidden md:block flex-1 bg-slate-200 dark:bg-slate-900" />
+//           {shortData && (
+//             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-3">
+//               <div className="flex items-center gap-2">
+//                 <span className="text-sm text-slate-300">Short URL:</span>
+//                 <a
+//                   href={shortData.short_url}
+//                   target="_blank"
+//                   rel="noreferrer"
+//                   className="text-sm text-indigo-400 underline break-all"
+//                 >
+//                   {shortData.short_url}
+//                 </a>
+//                 <button
+//                   onClick={handleCopy}
+//                   className="ml-auto px-2 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700"
+//                 >
+//                   {copyLabel}
+//                 </button>
+//               </div>
+
+//               <Link
+//                 to={`/analytics/${shortData.short_code}`}
+//                 className="inline-block mt-1 text-xs text-indigo-400 hover:text-indigo-300 underline transition"
+//               >
+//                 📊 View analytics
+//               </Link>
+
+//               {shortData.short_code && (
+//                 <QrPreview shortCode={shortData.short_code} />
+//               )}
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Right: gradient panel */}
+//         <div className="lg:col-span-6">
+//           <div className="relative h-full rounded-2xl bg-gradient-to-br from-indigo-500/25 via-sky-500/15 to-emerald-500/25 border border-slate-800 flex items-center justify-center">
+//             <div className="max-w-sm text-center space-y-4 px-6">
+//               <p className="text-xs uppercase tracking-widest text-slate-300">
+//                 Realtime insights
+//               </p>
+//               <p className="text-lg font-semibold">
+//                 Track every click by country, device, and referrer with a clean,
+//                 interactive dashboard.
+//               </p>
+//               <p className="text-xs text-slate-300">
+//                 Generate a short link now and open the analytics view to see
+//                 your traffic in action.
+//               </p>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
 //     </div>
 //   );
 // }
@@ -176,21 +202,43 @@
 //     };
 //   }, [shortCode]);
 
-//   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading QR code...</p>;
-//   if (error) return <p className="text-sm text-red-500 dark:text-red-400">{error}</p>;
+//   if (loading) {
+//     return (
+//       <p className="text-sm text-slate-500">Loading QR code...</p>
+//     );
+//   }
+//   if (error) {
+//     return (
+//       <p className="text-sm text-red-400">{error}</p>
+//     );
+//   }
 //   if (!qrUrl) return null;
 
 //   return (
 //     <div className="flex flex-col items-start gap-2">
-//       <span className="text-sm text-slate-700 dark:text-slate-300">QR Code:</span>
+//       <span className="text-sm text-slate-300">QR Code:</span>
 //       <img
 //         src={qrUrl}
 //         alt="QR code"
-//         className="w-32 h-32 border border-slate-300 dark:border-slate-700 rounded bg-white"
+//         className="w-32 h-32 border border-slate-700 rounded bg-white"
 //       />
 //     </div>
 //   );
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -201,7 +249,6 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// const API_BASE = 'http://localhost:3000';
 const API_BASE =
   import.meta.env.VITE_API_URL ||
   'https://url-shortener-production-9379.up.railway.app';
@@ -260,8 +307,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-50 flex items-center justify-center">
-      <div className="w-full px-10 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <div className="min-h-screen w-full bg-slate-950 text-slate-50">
+      <div className="mx-auto max-w-7xl px-4 lg:px-10 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
         {/* Left: hero + form */}
         <div className="lg:col-span-6 space-y-8">
           <header className="space-y-3">
@@ -351,8 +398,8 @@ export default function App() {
 
         {/* Right: gradient panel */}
         <div className="lg:col-span-6">
-          <div className="relative h-full rounded-2xl bg-gradient-to-br from-indigo-500/25 via-sky-500/15 to-emerald-500/25 border border-slate-800 flex items-center justify-center">
-            <div className="max-w-sm text-center space-y-4 px-6">
+          <div className="relative h-full rounded-2xl bg-gradient-to-br from-indigo-500/25 via-sky-500/20 to-emerald-500/25 border border-slate-800 flex items-center justify-center">
+            <div className="max-w-sm text-center space-y-4 px-6 py-8">
               <p className="text-xs uppercase tracking-widest text-slate-300">
                 Realtime insights
               </p>
@@ -400,14 +447,10 @@ function QrPreview({ shortCode }) {
   }, [shortCode]);
 
   if (loading) {
-    return (
-      <p className="text-sm text-slate-500">Loading QR code...</p>
-    );
+    return <p className="text-sm text-slate-500">Loading QR code...</p>;
   }
   if (error) {
-    return (
-      <p className="text-sm text-red-400">{error}</p>
-    );
+    return <p className="text-sm text-red-400">{error}</p>;
   }
   if (!qrUrl) return null;
 
