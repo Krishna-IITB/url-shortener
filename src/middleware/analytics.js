@@ -179,13 +179,12 @@
 
 
 
-
-
-
 import axios from 'axios';
 import { UAParser } from 'ua-parser-js';
 import pool from '../config/database.js';
+import redisClient from '../config/redis.js';
 
+// Geo lookup
 async function lookupGeo(ip) {
   try {
     const res = await axios.get(`https://ipapi.co/${ip}/json/`, { timeout: 1500 });
@@ -198,53 +197,69 @@ async function lookupGeo(ip) {
   }
 }
 
+// How long 2 hits from same IP + shortCode are treated as one click
+const CLICK_DEDUP_TTL_SECONDS = 5;
+
 const analyticsMiddleware = async (req, res, next) => {
   const { shortCode } = req.params;
 
-  const ipRaw =
-    (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+  const ip =
     req.ip ||
-    null; // store raw IP for DISTINCT
+    (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+    'unknown';
 
-  const userAgent = req.get('User-Agent') || null;
+  const userAgent = req.get('User-Agent') || 'unknown';
   const referer = req.get('Referer') || null;
 
-  const parser = new UAParser(userAgent || '');
+  const parser = new UAParser(userAgent);
   const device = parser.getDevice();
   const os = parser.getOS();
+  const deviceType = `${device.type || 'desktop'} ${os.name || 'unknown'}`.trim();
 
-  // Normalize device_type to a small set of values
-  const deviceType = device.type || 'desktop';      // 'mobile' | 'tablet' | 'desktop' | etc
-  const deviceLabel = `${deviceType} ${os.name || 'Unknown'}`; // for display only
-
+  // Log click asynchronously (do not block redirect)
   (async () => {
     try {
-      const { country } =
-        !ipRaw
-          ? { city: 'unknown', country: 'unknown' }
-          : await lookupGeo(ipRaw);
+      // De‑dup: same IP + shortCode within few seconds → count only once
+      const dedupKey = `click:${shortCode}:${ip}`;
 
-      // Insert click record with NORMALIZED columns
+      if (redisClient) {
+        try {
+          const exists = await redisClient.get(dedupKey);
+          if (exists) {
+            return; // duplicate HTTP hit, ignore
+          }
+          await redisClient.setEx(dedupKey, CLICK_DEDUP_TTL_SECONDS, '1');
+        } catch (e) {
+          console.error('Redis de‑dup error, continuing without de‑dup:', e.message);
+        }
+      }
+
+      const { city, country } =
+        ip === 'unknown'
+          ? { city: 'unknown', country: 'unknown' }
+          : await lookupGeo(ip);
+
+      // IMPORTANT: store raw IP + separate country
       await pool.query(
-        `INSERT INTO clicks (short_code, ip_address, user_agent, referer, country, device_type, clicked_at)
+        `INSERT INTO clicks (
+           short_code,
+           ip_address,
+           user_agent,
+           referer,
+           device_type,
+           country,
+           clicked_at
+         )
          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-        [
-          ipRaw,           // raw IP -> DISTINCT works correctly
-          ipRaw,           // if you want city/country in another column, add it separately
-          userAgent,
-          referer,
-          country,         // plain country name
-          deviceType       // 'desktop' / 'mobile' / 'tablet'
-        ]
+        [shortCode, ip, userAgent, referer, deviceType, country]
       );
 
-      // Keep url click counter in sync
       await pool.query(
         `UPDATE urls SET clicks = clicks + 1 WHERE short_code = $1`,
         [shortCode]
       );
 
-      console.log(`✅ Analytics logged for: ${shortCode} (${deviceLabel})`);
+      console.log(`✅ Analytics logged for: ${shortCode}`);
     } catch (err) {
       console.error('Analytics log failed:', err.message);
     }
