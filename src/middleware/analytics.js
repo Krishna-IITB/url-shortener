@@ -91,7 +91,8 @@
 import axios from 'axios';
 import { UAParser } from 'ua-parser-js';
 import pool from '../config/database.js';
-import redisClient from '../config/redisClient.js'; // <-- make sure path matches your redis file
+import redisClient from '../config/redis.js';
+
 
 async function lookupGeo(ip) {
   try {
