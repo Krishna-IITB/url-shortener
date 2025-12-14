@@ -1,4 +1,3 @@
-
 // // src/services/urlService.js
 // import validator from 'validator';
 // import urlModel from '../models/urlModel.js';
@@ -20,6 +19,7 @@
 //       expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
 //     }
 
+//     // Custom code path
 //     if (customCode) {
 //       if (!/^[a-zA-Z0-9]{3,20}$/.test(customCode)) {
 //         throw new Error('Custom code must be 3-20 alphanumeric characters');
@@ -51,6 +51,7 @@
 //       return created;
 //     }
 
+//     // Auto-generated path
 //     const existing = await urlModel.findByOriginalUrl(url);
 //     if (existing && !existing.expires_at) return existing;
 
@@ -156,8 +157,7 @@
 //         count: Number(item.count || 0),
 //       })),
 //       device_breakdown: deviceBreakdown.map((item) => ({
-//         os_name: item.os_name,
-//         device_model: item.device_model,
+//         device_type: item.device_type,            // <-- matches SQL
 //         count: Number(item.count || 0),
 //       })),
 //       top_referers: topReferrers.map((item) => ({
@@ -169,6 +169,12 @@
 // }
 
 // export default new UrlService();
+
+
+
+
+
+
 
 
 
@@ -316,26 +322,31 @@ class UrlService {
     const clicksByDate = raw.clicks_by_date || [];
     const topCountries = raw.top_countries || [];
     const deviceBreakdown = raw.device_breakdown || [];
-    const topReferrers = raw.top_referers || [];
+    const topReferrers = raw.top_referers || []; // from model, note single "r"
 
     return {
       short_code: shortCode,
       total_clicks: Number(raw.total_clicks || 0),
       unique_ips: Number(raw.unique_ips || 0),
+
       clicks_by_date: clicksByDate.map((item) => ({
         date: item.date,
         clicks: Number(item.clicks || 0),
       })),
+
       top_countries: topCountries.map((item) => ({
         country: item.country,
         count: Number(item.count || 0),
       })),
+
       device_breakdown: deviceBreakdown.map((item) => ({
-        device_type: item.device_type,            // <-- matches SQL
+        device_type: item.device_type,
         count: Number(item.count || 0),
       })),
-      top_referers: topReferrers.map((item) => ({
-        referer: item.referer,
+
+      // 👇 corrected shape for frontend
+      top_referrers: topReferrers.map((item) => ({
+        referrer: item.referer || '',
         count: Number(item.count || 0),
       })),
     };
