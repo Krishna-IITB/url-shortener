@@ -4,8 +4,17 @@
 // import toast from 'react-hot-toast';
 // import { useParams, Link } from 'react-router-dom';
 // import {
-//   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-//   PieChart, Pie, Cell, BarChart, Bar,
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   ResponsiveContainer,
+//   PieChart,
+//   Pie,
+//   Cell,
+//   BarChart,
+//   Bar,
 // } from 'recharts';
 // import { ArrowLeft, Sparkles } from 'lucide-react';
 
@@ -16,22 +25,40 @@
 // export default function AnalyticsPage() {
 //   const { code } = useParams();
 //   const [stats, setStats] = useState(null);
+//   const [browserStats, setBrowserStats] = useState([]);
 //   const [loading, setLoading] = useState(true);
+//   const [loadingBrowsers, setLoadingBrowsers] = useState(true);
 //   const [error, setError] = useState('');
 
 //   useEffect(() => {
 //     async function fetchStats() {
 //       try {
 //         setLoading(true);
+//         setLoadingBrowsers(true);
 //         setError('');
-//         const res = await axios.get(`${API_BASE}/api/stats/${code}`);
-//         setStats(res.data.data);
+
+//         const [statsRes, browsersRes] = await Promise.all([
+//           axios.get(`${API_BASE}/api/stats/${code}`),
+//           axios.get(`${API_BASE}/api/stats/${code}/browsers`),
+//         ]);
+
+//         setStats(statsRes.data.data);
+
+//         const normalizedBrowsers = (browsersRes.data.data || []).map((row) => ({
+//           browser:
+//             row.browser === 'WebKit'
+//               ? 'Safari / WebKit'
+//               : row.browser || 'Unknown',
+//           count: Number(row.count || 0),
+//         }));
+//         setBrowserStats(normalizedBrowsers);
 //       } catch (err) {
 //         const msg = err.response?.data?.error || 'Failed to load stats';
 //         setError(msg);
 //         toast.error(msg);
 //       } finally {
 //         setLoading(false);
+//         setLoadingBrowsers(false);
 //       }
 //     }
 //     fetchStats();
@@ -121,6 +148,11 @@
 //     '#a855f7',
 //     '#10b981',
 //   ];
+
+//   const maxBrowserCount =
+//     browserStats.length > 0
+//       ? Math.max(...browserStats.map((b) => b.count))
+//       : 1;
 
 //   return (
 //     <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-purple-900/20 to-slate-900 overflow-hidden">
@@ -266,13 +298,13 @@
 //                 <BarChart
 //                   data={deviceData}
 //                   margin={{ top: 10, right: 16, left: 0, bottom: 40 }}
-//                   barCategoryGap="30%"   // more spacing between bars
+//                   barCategoryGap="30%"
 //                 >
 //                   <XAxis
 //                     dataKey="device"
 //                     stroke="#9ca3af"
 //                     height={40}
-//                     interval="preserveStartEnd"  // let Recharts hide some ticks if needed[web:4]
+//                     interval="preserveStartEnd"
 //                     minTickGap={10}
 //                     tick={{ fontSize: 11, fill: '#9ca3af' }}
 //                   />
@@ -381,6 +413,49 @@
 //             </div>
 //           </motion.div>
 //         </motion.div>
+
+//         {/* BROWSERS */}
+//         <motion.div
+//           className="glass-card rounded-3xl p-8 shadow-2xl mt-8"
+//           initial={{ opacity: 0, y: 30 }}
+//           animate={{ opacity: 1, y: 0 }}
+//         >
+//           <p className="mb-6 text-xl font-bold text-slate-200 flex items-center gap-3">
+//             <div className="w-4 h-4 rounded-full bg-indigo-400 shadow-lg animate-pulse" />
+//             Browsers
+//           </p>
+
+//           {loadingBrowsers ? (
+//             <p className="text-xs text-slate-400">Loading browser stats…</p>
+//           ) : browserStats.length === 0 ? (
+//             <p className="text-xs text-slate-400">No browser data yet.</p>
+//           ) : (
+//             <div className="space-y-3">
+//               {browserStats.map((row) => (
+//                 <div
+//                   key={row.browser}
+//                   className="flex items-center gap-3 text-sm text-slate-200"
+//                 >
+//                   <div className="w-40 truncate font-medium">{row.browser}</div>
+//                   <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
+//                     <div
+//                       className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400"
+//                       style={{
+//                         width: `${Math.min(
+//                           100,
+//                           (row.count / maxBrowserCount) * 100
+//                         ).toFixed(1)}%`,
+//                       }}
+//                     />
+//                   </div>
+//                   <span className="w-10 text-right font-semibold text-slate-100">
+//                     {row.count}
+//                   </span>
+//                 </div>
+//               ))}
+//             </div>
+//           )}
+//         </motion.div>
 //       </div>
 //     </div>
 //   );
@@ -413,29 +488,6 @@
 //     </>
 //   );
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -598,6 +650,10 @@ export default function AnalyticsPage() {
     '#10b981',
   ];
 
+  const totalBrowserCount = browserStats.reduce(
+    (sum, b) => sum + b.count,
+    0
+  );
   const maxBrowserCount =
     browserStats.length > 0
       ? Math.max(...browserStats.map((b) => b.count))
@@ -655,7 +711,11 @@ export default function AnalyticsPage() {
               value: unique_ips.toLocaleString(),
               color: 'from-emerald-500',
             },
-            { label: 'Click Rate', value: `${clickRate}x`, color: 'from-purple-500' },
+            {
+              label: 'Click Rate',
+              value: `${clickRate}x`,
+              color: 'from-purple-500',
+            },
           ].map((stat, i) => (
             <motion.div
               key={i}
@@ -731,7 +791,7 @@ export default function AnalyticsPage() {
             </div>
           </motion.div>
 
-          {/* DEVICE TYPES – FIXED LAYOUT */}
+        {/* DEVICE TYPES – FIXED LAYOUT */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -863,45 +923,85 @@ export default function AnalyticsPage() {
           </motion.div>
         </motion.div>
 
-        {/* BROWSERS */}
+        {/* BROWSERS – NEW ANIMATED PANEL */}
         <motion.div
-          className="glass-card rounded-3xl p-8 shadow-2xl mt-8"
-          initial={{ opacity: 0, y: 30 }}
+          className="glass-card rounded-3xl p-8 shadow-2xl mt-4"
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <p className="mb-6 text-xl font-bold text-slate-200 flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full bg-indigo-400 shadow-lg animate-pulse" />
-            Browsers
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <motion.div
+              className="flex items-center gap-3"
+              animate={{ scale: [1, 1.03, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-indigo-400 to-sky-400 shadow-lg animate-pulse" />
+              <h2 className="text-xl font-bold text-slate-100">
+                Browser Insights
+              </h2>
+            </motion.div>
+            {totalBrowserCount > 0 && (
+              <p className="text-xs text-slate-400">
+                Total browser hits:{' '}
+                <span className="font-semibold text-slate-100">
+                  {totalBrowserCount}
+                </span>
+              </p>
+            )}
+          </div>
 
           {loadingBrowsers ? (
-            <p className="text-xs text-slate-400">Loading browser stats…</p>
+            <div className="flex items-center gap-3 text-sm text-slate-400">
+              <div className="w-4 h-4 border-2 border-slate-500/40 border-t-slate-100 rounded-full animate-spin" />
+              Loading browser stats…
+            </div>
           ) : browserStats.length === 0 ? (
-            <p className="text-xs text-slate-400">No browser data yet.</p>
+            <p className="text-sm text-slate-400">No browser data yet.</p>
           ) : (
             <div className="space-y-3">
-              {browserStats.map((row) => (
-                <div
-                  key={row.browser}
-                  className="flex items-center gap-3 text-sm text-slate-200"
-                >
-                  <div className="w-40 truncate font-medium">{row.browser}</div>
-                  <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (row.count / maxBrowserCount) * 100
-                        ).toFixed(1)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="w-10 text-right font-semibold text-slate-100">
-                    {row.count}
-                  </span>
-                </div>
-              ))}
+              {browserStats.map((row, idx) => {
+                const percentage =
+                  totalBrowserCount > 0
+                    ? (row.count / totalBrowserCount) * 100
+                    : 0;
+
+                return (
+                  <motion.div
+                    key={row.browser}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="group flex items-center gap-3 text-sm text-slate-200"
+                  >
+                    <div className="w-40 truncate font-medium">
+                      {row.browser}
+                    </div>
+
+                    <div className="flex-1 h-2.5 rounded-full bg-slate-900/80 overflow-hidden relative">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{
+                          width: `${Math.min(
+                            100,
+                            (row.count / maxBrowserCount) * 100
+                          ).toFixed(1)}%`,
+                        }}
+                        transition={{ duration: 0.6, delay: idx * 0.05 }}
+                        className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400 shadow-[0_0_18px_rgba(56,189,248,0.5)]"
+                      />
+                    </div>
+
+                    <div className="w-16 text-right">
+                      <p className="text-xs text-slate-400">
+                        {percentage.toFixed(1)}%
+                      </p>
+                      <p className="text-sm font-semibold text-slate-100">
+                        {row.count}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </motion.div>
