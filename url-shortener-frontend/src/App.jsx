@@ -195,8 +195,6 @@
 
 
 
-
-
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -262,8 +260,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-50 flex items-center">
-      <div className="max-w-6xl mx-auto w-full px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <div className="min-h-screen w-full bg-slate-950 text-slate-50 flex items-center justify-center">
+      <div className="w-full px-10 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Left: hero + form */}
         <div className="lg:col-span-6 space-y-8">
           <header className="space-y-3">
@@ -351,20 +349,20 @@ export default function App() {
           )}
         </div>
 
-        {/* Right: simple preview / gradient */}
-        <div className="hidden lg:flex lg:col-span-6">
-          <div className="relative flex-1 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-sky-500/10 to-emerald-500/20 border border-slate-800 flex items-center justify-center">
+        {/* Right: gradient panel */}
+        <div className="lg:col-span-6">
+          <div className="relative h-full rounded-2xl bg-gradient-to-br from-indigo-500/25 via-sky-500/15 to-emerald-500/25 border border-slate-800 flex items-center justify-center">
             <div className="max-w-sm text-center space-y-4 px-6">
-              <p className="text-xs uppercase tracking-widest text-slate-400">
+              <p className="text-xs uppercase tracking-widest text-slate-300">
                 Realtime insights
               </p>
               <p className="text-lg font-semibold">
                 Track every click by country, device, and referrer with a clean,
                 interactive dashboard.
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-300">
                 Generate a short link now and open the analytics view to see
-                live traffic.
+                your traffic in action.
               </p>
             </div>
           </div>
