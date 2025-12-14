@@ -47,7 +47,11 @@
 //   const parser = new UAParser(userAgent);
 //   const device = parser.getDevice();
 //   const os = parser.getOS();
-//   const deviceType = `${device.type || 'desktop'} ${os.name || 'unknown'}`.trim();
+
+//   const osName = os.name || 'unknown';
+//   const deviceModel = device.model || 'unknown';
+//   const deviceVendor = device.vendor || 'unknown';
+//   const deviceType = `${device.type || 'desktop'} ${osName}`.trim();
 
 //   // Log click asynchronously (do not block redirect)
 //   (async () => {
@@ -72,7 +76,7 @@
 //           ? { city: 'unknown', country: 'unknown' }
 //           : await lookupGeo(ip);
 
-//       // Store raw IP + separate country (for accurate unique IPs / countries)
+//       // Store raw IP + separate country + OS + model/vendor
 //       await pool.query(
 //         `INSERT INTO clicks (
 //            short_code,
@@ -80,11 +84,24 @@
 //            user_agent,
 //            referer,
 //            device_type,
+//            os_name,
+//            device_model,
+//            device_vendor,
 //            country,
 //            clicked_at
 //          )
-//          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-//         [shortCode, ip, userAgent, referer, deviceType, country]
+//          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+//         [
+//           shortCode,
+//           ip,
+//           userAgent,
+//           referer,
+//           deviceType,
+//           osName,
+//           deviceModel,
+//           deviceVendor,
+//           country,
+//         ]
 //       );
 
 //       await pool.query(
@@ -102,6 +119,9 @@
 // };
 
 // export default analyticsMiddleware;
+
+
+
 
 
 
@@ -159,11 +179,13 @@ const analyticsMiddleware = async (req, res, next) => {
   const parser = new UAParser(userAgent);
   const device = parser.getDevice();
   const os = parser.getOS();
+  const browser = parser.getBrowser();
 
   const osName = os.name || 'unknown';
   const deviceModel = device.model || 'unknown';
   const deviceVendor = device.vendor || 'unknown';
   const deviceType = `${device.type || 'desktop'} ${osName}`.trim();
+  const browserName = browser.name || 'unknown';
 
   // Log click asynchronously (do not block redirect)
   (async () => {
@@ -188,7 +210,7 @@ const analyticsMiddleware = async (req, res, next) => {
           ? { city: 'unknown', country: 'unknown' }
           : await lookupGeo(ip);
 
-      // Store raw IP + separate country + OS + model/vendor
+      // Store raw IP + UA + device + browser
       await pool.query(
         `INSERT INTO clicks (
            short_code,
@@ -200,9 +222,10 @@ const analyticsMiddleware = async (req, res, next) => {
            device_model,
            device_vendor,
            country,
+           browser,
            clicked_at
          )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
         [
           shortCode,
           ip,
@@ -213,6 +236,7 @@ const analyticsMiddleware = async (req, res, next) => {
           deviceModel,
           deviceVendor,
           country,
+          browserName,
         ]
       );
 
