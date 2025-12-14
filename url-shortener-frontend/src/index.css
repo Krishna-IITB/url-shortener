@@ -1,6 +1,4 @@
-/* -------------------------------
-   Ensure root elements take full height
----------------------------------*/
+/* root + tailwind (keep your existing) */
 html,
 body,
 #root {
@@ -10,25 +8,18 @@ body,
   padding: 0;
 }
 
-/* Base body styles */
 body {
   margin: 0;
-  background-color: #020617; /* tailwind slate-950 */
-  color: #e5e7eb;            /* tailwind slate-200 */
+  background-color: #020617;
+  color: #e5e7eb;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
 }
 
-/* -------------------------------
-   Tailwind directives
----------------------------------*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* -------------------------------
-   Custom global styles
----------------------------------*/
 :root {
   line-height: 1.5;
   font-weight: 400;
@@ -37,26 +28,56 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Links */
 a {
   font-weight: 500;
-  color: #6366f1; /* indigo-500 */
+  color: #6366f1;
   text-decoration: none;
 }
 
 a:hover {
-  color: #818cf8; /* indigo-400 */
+  color: #818cf8;
 }
 
-/* Buttons inherit styles from Tailwind; keep only minimal reset */
 button {
   font-family: inherit;
 }
 
-/* Optional light-mode preference (kept minimal) */
 @media (prefers-color-scheme: light) {
   body {
-    background-color: #f9fafb; /* gray-50 */
-    color: #0f172a;            /* slate-900 */
+    background-color: #0f172a;
+    color: #e5e7eb;
   }
+}
+
+/* soft gradient blobs behind everything */
+.bg-orbit {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.bg-orbit::before,
+.bg-orbit::after {
+  content: '';
+  position: absolute;
+  filter: blur(80px);
+  opacity: 0.6;
+}
+
+.bg-orbit::before {
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle at 30% 30%, #4f46e5, transparent 60%);
+  top: -80px;
+  left: -60px;
+}
+
+.bg-orbit::after {
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(circle at 70% 70%, #22c55e, transparent 60%);
+  bottom: -120px;
+  right: -80px;
 }
