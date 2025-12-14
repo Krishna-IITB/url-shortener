@@ -18,7 +18,6 @@
 //   Legend,
 // } from 'recharts';
 
-// // const API_BASE = 'http://localhost:3000';
 // const API_BASE =
 //   import.meta.env.VITE_API_URL ||
 //   'https://url-shortener-production-9379.up.railway.app';
@@ -91,18 +90,25 @@
 //     value: c.count,
 //   }));
 
-//   const deviceData = (device_breakdown || []).map((d) => ({
-//     device: d.device_model || d.os_name || 'Unknown',
-//     count: d.count,
-//   }));
+// // const deviceData = (device_breakdown || []).map((d) => ({
+// //   device: d.device_model || d.os_name || 'Unknown',
+// //   count: d.count,
+// // }));
+
+// const deviceData = (device_breakdown || []).map((d) => ({
+//   device: d.device_model || d.os_name || 'Unknown',
+//   count: d.count,
+// }));
+
+
 
 //   const referrerData = top_referrers || [];
 
 //   const COLORS = ['#6366f1', '#22c55e', '#f97316', '#e11d48', '#06b6d4'];
 
 //   return (
-//     <div className="min-h-screen bg-slate-950 text-slate-50">
-//       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+//     <div className="min-h-screen w-full bg-slate-950 text-slate-50">
+//       <div className="mx-auto max-w-7xl px-4 lg:px-10 py-8 space-y-8">
 //         {/* Header */}
 //         <div className="flex items-center justify-between">
 //           <div>
@@ -265,24 +271,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // src/AnalyticsPage.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -375,16 +363,11 @@ export default function AnalyticsPage() {
     value: c.count,
   }));
 
-// const deviceData = (device_breakdown || []).map((d) => ({
-//   device: d.device_model || d.os_name || 'Unknown',
-//   count: d.count,
-// }));
-
-const deviceData = (device_breakdown || []).map((d) => ({
-  device: d.device_type || 'Unknown',
-  count: Number(d.count || 0),
-}));
-
+  // Use device_type coming from API (set in urlService)
+  const deviceData = (device_breakdown || []).map((d) => ({
+    device: d.device_type || 'Unknown',
+    count: Number(d.count || 0),
+  }));
 
   const referrerData = top_referrers || [];
 
