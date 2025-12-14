@@ -29,8 +29,9 @@
 //   }
 // }
 
-// // How long 2 hits from same IP + shortCode are treated as one click
-// const CLICK_DEDUP_TTL_SECONDS = 5;
+// // Longer window + include userAgent in key so same device is de‑duped,
+// // different devices behind same IP still count separately.
+// const CLICK_DEDUP_TTL_SECONDS = 15;
 
 // const analyticsMiddleware = async (req, res, next) => {
 //   const { shortCode } = req.params;
@@ -51,14 +52,14 @@
 //   // Log click asynchronously (do not block redirect)
 //   (async () => {
 //     try {
-//       // De‑dup: same IP + shortCode within few seconds → count only once
-//       const dedupKey = `click:${shortCode}:${ip}`;
+//       // De‑dup: same IP + UA + shortCode within window → one click
+//       const dedupKey = `click:${shortCode}:${ip}:${userAgent}`;
 
 //       if (redisClient) {
 //         try {
 //           const exists = await redisClient.get(dedupKey);
 //           if (exists) {
-//             return; // duplicate HTTP hit, ignore
+//             return; // duplicate technical hit, ignore
 //           }
 //           await redisClient.setEx(dedupKey, CLICK_DEDUP_TTL_SECONDS, '1');
 //         } catch (e) {
@@ -101,6 +102,10 @@
 // };
 
 // export default analyticsMiddleware;
+
+
+
+
 
 
 
@@ -154,7 +159,11 @@ const analyticsMiddleware = async (req, res, next) => {
   const parser = new UAParser(userAgent);
   const device = parser.getDevice();
   const os = parser.getOS();
-  const deviceType = `${device.type || 'desktop'} ${os.name || 'unknown'}`.trim();
+
+  const osName = os.name || 'unknown';
+  const deviceModel = device.model || 'unknown';
+  const deviceVendor = device.vendor || 'unknown';
+  const deviceType = `${device.type || 'desktop'} ${osName}`.trim();
 
   // Log click asynchronously (do not block redirect)
   (async () => {
@@ -179,7 +188,7 @@ const analyticsMiddleware = async (req, res, next) => {
           ? { city: 'unknown', country: 'unknown' }
           : await lookupGeo(ip);
 
-      // Store raw IP + separate country (for accurate unique IPs / countries)
+      // Store raw IP + separate country + OS + model/vendor
       await pool.query(
         `INSERT INTO clicks (
            short_code,
@@ -187,11 +196,24 @@ const analyticsMiddleware = async (req, res, next) => {
            user_agent,
            referer,
            device_type,
+           os_name,
+           device_model,
+           device_vendor,
            country,
            clicked_at
          )
-         VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-        [shortCode, ip, userAgent, referer, deviceType, country]
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+        [
+          shortCode,
+          ip,
+          userAgent,
+          referer,
+          deviceType,
+          osName,
+          deviceModel,
+          deviceVendor,
+          country,
+        ]
       );
 
       await pool.query(
