@@ -90,17 +90,11 @@
 //     value: c.count,
 //   }));
 
-// // const deviceData = (device_breakdown || []).map((d) => ({
-// //   device: d.device_model || d.os_name || 'Unknown',
-// //   count: d.count,
-// // }));
-
-// const deviceData = (device_breakdown || []).map((d) => ({
-//   device: d.device_model || d.os_name || 'Unknown',
-//   count: d.count,
-// }));
-
-
+//   // Use device_type coming from API (set in urlService)
+//   const deviceData = (device_breakdown || []).map((d) => ({
+//     device: d.device_type || 'Unknown',
+//     count: Number(d.count || 0),
+//   }));
 
 //   const referrerData = top_referrers || [];
 
@@ -268,6 +262,9 @@
 
 
 
+
+
+
 // src/AnalyticsPage.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -360,11 +357,15 @@ export default function AnalyticsPage() {
     value: c.count,
   }));
 
-  // Use device_type coming from API (set in urlService)
-  const deviceData = (device_breakdown || []).map((d) => ({
-    device: d.device_type || 'Unknown',
-    count: Number(d.count || 0),
-  }));
+  // Prepare device data: keep raw label + wrapped label for axis
+  const deviceData = (device_breakdown || []).map((d) => {
+    const rawLabel = d.device_type || 'Unknown';
+    return {
+      rawLabel,
+      device: rawLabel.replace(' ', '\n'), // allow 2-line labels
+      count: Number(d.count || 0),
+    };
+  });
 
   const referrerData = top_referrers || [];
 
@@ -432,26 +433,53 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Device bar chart */}
+          {/* Device bar chart + list */}
           <div className="lg:col-span-4 bg-slate-900/80 border border-slate-800 rounded-xl p-4">
             <p className="mb-3 text-sm text-slate-300">Device Types</p>
             {deviceData.length === 0 ? (
               <p className="text-sm text-slate-400">No device data yet</p>
             ) : (
-              <div className="w-full h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={deviceData}>
-                    <XAxis dataKey="device" stroke="#9ca3af" />
-                    <YAxis allowDecimals={false} stroke="#9ca3af" />
-                    <Tooltip />
-                    <Bar
-                      dataKey="count"
-                      fill="#22c55e"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <>
+                <div className="w-full h-60">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={deviceData}
+                      margin={{ left: 0, right: 16, bottom: 24 }}
+                    >
+                      <XAxis
+                        dataKey="device"
+                        stroke="#9ca3af"
+                        interval={0}
+                        tick={{ fontSize: 11, lineHeight: 1.1 }}
+                      />
+                      <YAxis allowDecimals={false} stroke="#9ca3af" />
+                      <Tooltip
+                        formatter={(value, _name, entry) => [
+                          value,
+                          entry.payload.rawLabel || 'Device',
+                        ]}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill="#22c55e"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Explicit list of all devices + counts */}
+                <ul className="mt-3 space-y-1 text-xs text-slate-400">
+                  {deviceData.map((d) => (
+                    <li key={d.rawLabel}>
+                      {d.rawLabel}:{' '}
+                      <span className="font-semibold text-slate-100">
+                        {d.count}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
             )}
           </div>
         </div>
