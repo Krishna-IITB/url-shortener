@@ -1,13 +1,13 @@
-// src/services/urlService.js
 import validator from 'validator';
 import urlModel from '../models/urlModel.js';
 import redisClient from '../config/redis.js';
 import base62 from '../utils/base62.js';
 
 class UrlService {
+
   async createShortUrl({ url, customCode = null, ttlHours = null }) {
     if (!url || !validator.isURL(url, { require_protocol: true })) {
-      throw new Error('Invalid URL provided');
+      throw new Error('Invalid URL');
     }
 
     let expiresAt = null;
@@ -15,11 +15,14 @@ class UrlService {
       expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
     }
 
+    
     if (customCode) {
-      this.validateCustomCode(customCode);
+      if (customCode.length < 3 || customCode.length > 20) {
+        throw new Error('Code must be 3-20 characters');
+      }
 
       const existing = await urlModel.findByShortCode(customCode);
-      if (existing) throw new Error(`Short code '${customCode}' already taken`);
+      if (existing) throw new Error('Code already taken');
 
       const created = await urlModel.create({
         original_url: url,
@@ -31,12 +34,15 @@ class UrlService {
       return created;
     }
 
-    // Check if URL already exists to save space
+    // Check if URL exists to save space
     const existing = await urlModel.findByOriginalUrl(url);
-    if (existing && !existing.expires_at) return existing;
+    if (existing && !existing.expires_at) {
+        return existing;
+    }
 
-    const tempId = await urlModel.getNextId();
-    const shortCode = base62.encode(tempId);
+    // Generate new short code
+    const id = await urlModel.getNextId();
+    const shortCode = base62.encode(id);
 
     const created = await urlModel.create({
       original_url: url,
@@ -48,29 +54,17 @@ class UrlService {
     return created;
   }
 
-  validateCustomCode(code) {
-    if (!/^[a-zA-Z0-9]{3,20}$/.test(code)) {
-      throw new Error('Custom code must be 3-20 alphanumeric characters');
-    }
-
-    const reserved = ['api', 'admin', 'stats', 'analytics', 'health', 'qr', 'preview'];
-    if (reserved.includes(code.toLowerCase())) {
-      throw new Error(`'${code}' is a reserved word`);
-    }
-  }
-
   async getOriginalUrl(shortCode) {
     const cacheKey = `url:${shortCode}`;
 
     try {
+      // Check Redis 
       const cachedUrl = await redisClient.get(cacheKey);
       if (cachedUrl) {
-        if (process.env.NODE_ENV === 'development') {
-           console.log(`[Redis] Hit: ${shortCode}`);
-        }
         return cachedUrl;
       }
 
+      
       const urlRecord = await urlModel.findByShortCode(shortCode);
       if (!urlRecord) return null;
 
@@ -78,66 +72,51 @@ class UrlService {
         return null;
       }
 
+      // Save to Redis 
       await this.cacheUrl(shortCode, urlRecord.original_url);
+      
       return urlRecord.original_url;
 
     } catch (err) {
-      console.error(`[UrlService] Error fetching ${shortCode}:`, err);
+      console.log("Error in getOriginalUrl:", err);
       return null;
     }
   }
 
-  async invalidateCache(shortCode) {
-    await redisClient.del(`url:${shortCode}`);
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Cache] Invalidated: ${shortCode}`);
-    }
-  }
-
-  isValidUrl(url) {
-    return validator.isURL(url, {
-      require_protocol: true,
-      protocols: ['http', 'https'],
-    });
-  }
-
   async cacheUrl(shortCode, originalUrl) {
-    let ttl = 300; // Default 5 mins
+    let ttl = 300; // 5 minutes default
 
+    // many clicks keep in cache longer
     try {
-      // Dynamic TTL: Popular URLs stay in cache longer (1 hour)
-      const rawStats = await urlModel.getClickStats(shortCode);
-      if (rawStats?.total_clicks > 10) {
-        ttl = 3600;
+      const stats = await urlModel.getClickStats(shortCode);
+      if (stats && stats.total_clicks > 50) {
+        ttl = 3600; 
       }
     } catch (err) {
-      // Fallback to default TTL if stats fail
-      ttl = 300; 
+      
     }
 
     await redisClient.setEx(`url:${shortCode}`, ttl, originalUrl);
   }
 
   async getUrlStats(shortCode) {
-    const raw = await urlModel.getClickStats(shortCode);
-    if (!raw) return null;
-
-    // Helper to safely format arrays
-    const fmt = (arr, keyName, valName = 'count') => 
-      (arr || []).map(i => ({ [keyName]: i[keyName] || i.name || '', [valName]: Number(i.count || 0) }));
+    const data = await urlModel.getClickStats(shortCode);
+    if (!data) return null;
 
     return {
       short_code: shortCode,
-      total_clicks: Number(raw.total_clicks || 0),
-      unique_ips: Number(raw.unique_ips || 0),
-      clicks_by_date: (raw.clicks_by_date || []).map(i => ({ date: i.date, clicks: Number(i.clicks || 0) })),
-      top_countries: fmt(raw.top_countries, 'country'),
-      device_breakdown: fmt(raw.device_breakdown, 'device_type'),
-      // Note: Model uses 'referer' (single r) but API returns 'referrer'
-      top_referrers: (raw.top_referers || []).map(i => ({ 
-        referrer: i.referer || 'Direct', 
-        count: Number(i.count || 0) 
+      total_clicks: Number(data.total_clicks || 0),
+      unique_ips: Number(data.unique_ips || 0),
+      
+      top_countries: (data.top_countries || []).map(i => ({ 
+          country: i.country || 'Unknown', 
+          count: Number(i.count) 
       })),
+      
+      device_breakdown: (data.device_breakdown || []).map(i => ({ 
+          device: i.device_type, 
+          count: Number(i.count) 
+      }))
     };
   }
 }
