@@ -34,13 +34,13 @@ class UrlService {
       return created;
     }
 
-    // Check if URL exists to save space
+
     const existing = await urlModel.findByOriginalUrl(url);
     if (existing && !existing.expires_at) {
         return existing;
     }
 
-    // Generate new short code
+    // new code
     const id = await urlModel.getNextId();
     const shortCode = base62.encode(id);
 
@@ -58,7 +58,7 @@ class UrlService {
     const cacheKey = `url:${shortCode}`;
 
     try {
-      // Check Redis 
+      // for Redis 
       const cachedUrl = await redisClient.get(cacheKey);
       if (cachedUrl) {
         return cachedUrl;
@@ -84,9 +84,9 @@ class UrlService {
   }
 
   async cacheUrl(shortCode, originalUrl) {
-    let ttl = 300; // 5 minutes default
+    let ttl = 300; // 5 min timer
 
-    // many clicks keep in cache longer
+    
     try {
       const stats = await urlModel.getClickStats(shortCode);
       if (stats && stats.total_clicks > 50) {
